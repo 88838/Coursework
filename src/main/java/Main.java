@@ -16,19 +16,19 @@ public class Main {
     public static void menu(){
         Scanner sc = new Scanner(System.in);
         int option;
-        System.out.println("1. New user");
-        System.out.println("2. Display users");
-        System.out.println("3. Update Users");
-        System.out.println("4. Delete Users");
+        System.out.println("1. New player");
+        System.out.println("2. Display players");
+        System.out.println("3. Update player");
+        System.out.println("4. Delete player");
         option = sc.nextInt();
         if(option==1) {
-            Users.createUser();
+            Players.createPlayer();
         }else if(option==2){
-            Users.displayUsers();
+            Players.displayPlayers();
         }else if(option==3){
-            Users.updateUser();
+            Players.updatePlayer();
         }else if(option==4){
-            Users.deleteUser();
+            Players.deletePlayer();
         }
     }
 
