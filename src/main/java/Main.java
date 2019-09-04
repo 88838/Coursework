@@ -5,19 +5,31 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
+
+
         openDatabase("testDatabase.db");
 
-        System.out.println("1. New user");
-        System.out.println("2. Display users");
-        if(sc.nextInt()==1) {
-            Users.createUser();
-        }else if(sc.nextInt()==2){
-            Users.displayUsers();
-        }
-
+        menu();
 
         closeDatabase();
+    }
+    public static void menu(){
+        Scanner sc = new Scanner(System.in);
+        int option;
+        System.out.println("1. New user");
+        System.out.println("2. Display users");
+        System.out.println("3. Update Users");
+        System.out.println("4. Delete Users");
+        option = sc.nextInt();
+        if(option==1) {
+            Users.createUser();
+        }else if(option==2){
+            Users.displayUsers();
+        }else if(option==3){
+            Users.updateUser();
+        }else if(option==4){
+            Users.deleteUser();
+        }
     }
 
 
