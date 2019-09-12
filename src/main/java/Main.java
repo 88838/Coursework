@@ -1,6 +1,5 @@
 import org.sqlite.SQLiteConfig;
 import java.sql.*;
-import java.util.Scanner;
 
 public class Main {
 
