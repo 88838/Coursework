@@ -12,7 +12,8 @@ public class Players {
             PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Players (Username, Password, SkinID) VALUES (?,?,?)");
 
 
-            //the parameter index corresponds with each question mark
+            //the first parameter corresponds with the index of each question mark
+            //the second parameter is a variable that replaces the question marks
             ps.setString(1, username);
             ps.setString(2, password);
             //the player starts with the default skin, therefore it a variable doesn't need to passed in
