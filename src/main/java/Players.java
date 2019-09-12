@@ -9,15 +9,13 @@ public class Players {
 
             //the question marks are placeholders
             //user ID is auto-incrementing so it is not needed in the SQL statement
-            PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Players (Username, Password, SkinID) VALUES (?,?,?)");
+            PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Players (Username, Password) VALUES (?,?)");
 
 
             //the first parameter corresponds with the index of each question mark
             //the second parameter is a variable that replaces the question marks
             ps.setString(1, username);
             ps.setString(2, password);
-            //the player starts with the default skin, therefore it a variable doesn't need to passed in
-            ps.setInt(3, 1);
 
             //this actually execute the SQL
             ps.executeUpdate();
