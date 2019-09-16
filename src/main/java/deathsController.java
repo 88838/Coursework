@@ -1,7 +1,9 @@
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class Deaths {
+public class deathsController {
+
     public static void createDeath() {
         try {
             int playerID = 1;
@@ -14,7 +16,8 @@ public class Deaths {
             PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Deaths (PlayerID, LivesLeft, DeathLocationX, DeathLocationY, StageID) VALUES (?,?,?,?,?)");
 
 
-            //the parameter index corresponds with each question mark
+            //the first parameter corresponds with the index of each question mark
+            //the second parameter is a variable that replaces the question marks
             ps.setInt(1, playerID);
             ps.setInt(2, livesLeft);
             ps.setInt(3, deathLocationX);
@@ -23,8 +26,8 @@ public class Deaths {
             ps.executeUpdate();
 
 
-        } catch (Exception exception) {
-            System.out.println("Database error: " + exception.getMessage());
+        } catch (SQLException exception) {
+            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
         }
     }
     public static void readDeaths(){
@@ -34,7 +37,7 @@ public class Deaths {
             ResultSet results = ps.executeQuery();
             //returns false and stops the loop when there are no more records
             while (results.next()) {
-                //the column index matches  the columns in the table
+                //the parameter matches the index of the columns in the table
                 int playerID = results.getInt(1);
                 int livesLeft = results.getInt(2);
                 int deathLocationX = results.getInt(3);
@@ -48,8 +51,8 @@ public class Deaths {
 
                 System.out.println();
             }
-        } catch (Exception exception) {
-            System.out.println("Database error: " + exception.getMessage());
+        } catch (SQLException exception) {
+            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
         }
     }
     public static void updateKills() {
@@ -72,8 +75,8 @@ public class Deaths {
             ps.executeUpdate();
 
 
-        } catch (Exception exception) {
-            System.out.println(exception.getMessage());
+        } catch (SQLException exception) {
+            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
 
         }
     }
@@ -85,8 +88,8 @@ public class Deaths {
             ps.setInt(1, playerID);
             ps.executeUpdate();
 
-        } catch (Exception exception) {
-            System.out.println(exception.getMessage());
+        } catch (SQLException exception) {
+            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
 
         }
 
