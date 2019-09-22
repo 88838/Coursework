@@ -13,6 +13,9 @@ public class playersController {
             //user ID is auto-incrementing so it is not needed in the SQL statement
             PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Players (Username, Password) VALUES (?,?)");
 
+
+            checkPassword(password);
+
             //the first parameter corresponds with the index of each question mark
             //the second parameter is a variable that replaces the question marks
             ps.setString(1, username);
@@ -23,6 +26,8 @@ public class playersController {
 
         } catch (SQLException exception) {
             System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
+        } catch(passwordConstraintsException exception){
+            System.out.println(exception.getMessage());
         }
     }
 
@@ -178,5 +183,34 @@ public class playersController {
 
         }
 
+    }
+    public static class passwordConstraintsException extends Exception {
+        public passwordConstraintsException(String message){
+            super(message);
+        }
+    }
+    public static void checkPassword(String password) throws passwordConstraintsException{
+
+            boolean containsUpper = false;
+            boolean containsLower = false;
+            boolean containsDigit = false;
+            boolean correctLength = false;
+
+            if (password.length() >= 8) {
+                correctLength = true;
+                for(int i = 0; i < password.length(); i ++){
+                    char currentCharacter = password.charAt(i);
+                    if (Character.isLowerCase(currentCharacter)) {
+                        containsLower = true;
+                    }else if(Character.isUpperCase(currentCharacter)){
+                        containsUpper = true;
+                    }else if(Character.isDigit(currentCharacter)){
+                        containsDigit = true;
+                    }
+                }
+            }
+            if (!(containsUpper && containsLower && containsDigit && correctLength)) {
+                throw new passwordConstraintsException("Password must be bigger than 8 characters, contain an upper case and lower case letter, contain a digit.");
+            }
     }
 }
