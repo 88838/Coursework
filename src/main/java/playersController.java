@@ -118,6 +118,48 @@ public class playersController {
 
     }
 
+    public static void updateHighScore() {
+        try {
+            int highScore = 1;
+            int playerID = 1;
+
+            //the question marks are placeholders
+            //the skin can be updated depending on the PlayerID that is inputted
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET HighScore = ?, WHERE PlayerID = ?");
+
+            //the first parameter corresponds with the index of each question mark
+            //the second parameter is a variable that replaces the question marks
+            ps.setInt(1, highScore);
+            ps.executeUpdate();
+
+        } catch (SQLException exception) {
+            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
+
+        }
+
+    }
+
+    public static void updateCurrency() {
+        try {
+            int currency = 1;
+            int playerID = 1;
+
+            //the question marks are placeholders
+            //the skin can be updated depending on the PlayerID that is inputted
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Currency = ?, WHERE PlayerID = ?");
+
+            //the first parameter corresponds with the index of each question mark
+            //the second parameter is a variable that replaces the question marks
+            ps.setInt(1, currency);
+            ps.executeUpdate();
+
+        } catch (SQLException exception) {
+            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
+
+        }
+
+    }
+
     public static void deletePlayer(){
         try {
             int playerID = 1;
