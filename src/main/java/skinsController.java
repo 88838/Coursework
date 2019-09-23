@@ -9,9 +9,9 @@ public class skinsController {
             PreparedStatement ps = Main.db.prepareStatement("SELECT SkinID, SkinName, ImageFile, Cost  FROM Skins");
 
             ResultSet results = ps.executeQuery();
-            //returns false and stops the loop when there are no more records
+
             while (results.next()) {
-                //the parameter matches the index of the columns in the table
+
                 int skinID = results.getInt(1);
                 String skinName = results.getString(2);
                 String imageFile = results.getString(3);

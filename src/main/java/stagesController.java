@@ -9,9 +9,9 @@ public class stagesController {
             PreparedStatement ps = Main.db.prepareStatement("SELECT StageID, LocationY, ImageFile  FROM Stages");
 
             ResultSet results = ps.executeQuery();
-            //returns false and stops the loop when there are no more records
+
             while (results.next()) {
-                //the parameter matches the index of the columns in the table
+
                 int stageID = results.getInt(1);
                 int locationY = results.getInt(2);
                 int imgFile = results.getInt(3);

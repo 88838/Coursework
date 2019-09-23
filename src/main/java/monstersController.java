@@ -9,9 +9,7 @@ public class monstersController {
             PreparedStatement ps = Main.db.prepareStatement("SELECT MonsterID, MonsterName, MovementType, AttackType, ImageFile  FROM Monsters");
 
             ResultSet results = ps.executeQuery();
-            //returns false and stops the loop when there are no more records
             while (results.next()) {
-                //the parameter matches the index of the columns in the table
                 int monsterID = results.getInt(1);
                 String monsterName = results.getString(2);
                 String movementType = results.getString(3);
