@@ -1,3 +1,12 @@
+package Controllers;
+
+import Server.Main;
+import org.json.simple.JSONArray;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -5,7 +14,9 @@ import java.sql.SQLException;
 public class playersController {
 
     //the createPlayer function is needed for when the player is creating an account
+
     public static void createPlayer(String username, String password) {
+
         try {
             //UserID is auto-incrementing so it is not needed in the SQL statement
             //SkinID is assigned a default value in SQL so it is not needed in the SQL statement
@@ -33,11 +44,19 @@ public class playersController {
         }
     }
 
+    @GET
+    @Path("list")
+    @Produces(MediaType.APPLICATION_JSON)
     //the readPlayers function is needed to print out all the data from the players table
     public static void readPlayers() {
+        System.out.println("players/list");
+        JSONArray list = new JSONArray();
         try {
             //rather than doing select * from, each individual field is in the SQL query, so I can print them out separately
-            PreparedStatement ps = Main.db.prepareStatement("SELECT PlayerID, Username, Password, HighScore, Currency, SkinID  FROM Players");
+            PreparedStatement ps = Main.db.prepareStatement("SELECT Players.PlayerID, Username, HighScore, Currency, SkinID, NumberOfKills, MonsterID  " +
+                                                                "FROM Players, Kills " +
+                                                                "WHERE Players.PlayerID = Kills.PlayerID");
+            //SELECT Players.PlayerID, Players.Username, Players.HighScore, Players.Currency, Players.SkinID, (SELECT SUM(Kills.NumberOfKills) FROM Kills WHERE Kills.PlayerID = Players.PlayerID) FROM Players
 
             //results is used to store all of the results of the query
             ResultSet results = ps.executeQuery();
