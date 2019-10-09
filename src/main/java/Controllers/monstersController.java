@@ -10,7 +10,7 @@ public class monstersController {
 
     public static void readMonsters(){
         try{
-            PreparedStatement ps = Main.db.prepareStatement("SELECT MonsterID, MonsterName, MovementType, AttackType, ImageFile  FROM Monsters");
+            PreparedStatement ps = Main.db.prepareStatement("SELECT MonsterID, MonsterName, MovementType, AttackType, ImageFile, StageID  FROM Monsters");
 
             ResultSet results = ps.executeQuery();
             while (results.next()) {

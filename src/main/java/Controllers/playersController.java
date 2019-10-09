@@ -13,10 +13,48 @@ import java.sql.SQLException;
 
 public class playersController {
 
+    //the checkPassword function is needed to check that the password follows the constraints set out in phase 1 design
+    //this could not be done through SQL and therefore has to be done in Java
+    public static void checkPassword(String password) throws passwordConstraintsException{
+
+        //all variables these need to be set to false by default before the password can be checked
+        boolean containsUpper = false;
+        boolean containsLower = false;
+        boolean containsDigit = false;
+        boolean correctLength = false;
+
+        //the other constraints don't need to be checked if the basic length check fails
+        if (password.length() >= 8) {
+            correctLength = true;
+            //loops through every single character in the password and checks whether it is uppercase, lowercase or a digit
+            for(int i = 0; i < password.length(); i ++){
+                char currentCharacter = password.charAt(i);
+                if (Character.isLowerCase(currentCharacter)) {
+                    containsLower = true;
+                }else if(Character.isUpperCase(currentCharacter)){
+                    containsUpper = true;
+                }else if(Character.isDigit(currentCharacter)){
+                    containsDigit = true;
+                }
+            }
+        }
+        //if any of the variables are false then an exception is thrown, which contains a custom message
+        if (!(containsUpper && containsLower && containsDigit && correctLength)) {
+            throw new passwordConstraintsException("Abort due to constraint violation (Password must be bigger than 8 characters, contain an uppercase and lowercase letter, contain a digit)");
+        }
+    }
+
+    //this class is needed to extend the Exception class that is part of the regular Java package
+    //by extending the Exception class, a checked exception is defined which means it must be caught or thrown
+    public static class passwordConstraintsException extends Exception {
+        public passwordConstraintsException(String message){
+            //the message parameter is passed into the super class, which is the Exception class
+            super(message);
+        }
+    }
+
     //the createPlayer function is needed for when the player is creating an account
-
     public static void createPlayer(String username, String password) {
-
         try {
             //UserID is auto-incrementing so it is not needed in the SQL statement
             //SkinID is assigned a default value in SQL so it is not needed in the SQL statement
@@ -44,19 +82,11 @@ public class playersController {
         }
     }
 
-    @GET
-    @Path("list")
-    @Produces(MediaType.APPLICATION_JSON)
     //the readPlayers function is needed to print out all the data from the players table
     public static void readPlayers() {
-        System.out.println("players/list");
-        JSONArray list = new JSONArray();
         try {
-            //rather than doing select * from, each individual field is in the SQL query, so I can print them out separately
-            PreparedStatement ps = Main.db.prepareStatement("SELECT Players.PlayerID, Username, HighScore, Currency, SkinID, NumberOfKills, MonsterID  " +
-                                                                "FROM Players, Kills " +
-                                                                "WHERE Players.PlayerID = Kills.PlayerID");
-            //SELECT Players.PlayerID, Players.Username, Players.HighScore, Players.Currency, Players.SkinID, (SELECT SUM(Kills.NumberOfKills) FROM Kills WHERE Kills.PlayerID = Players.PlayerID) FROM Players
+            //rather than doing select * from, each individual field is in the SQL query, so I can print them out separately to test them
+            PreparedStatement ps = Main.db.prepareStatement("SELECT PlayerID, Username, Password, HighScore, Currency, SkinID  FROM Players");
 
             //results is used to store all of the results of the query
             ResultSet results = ps.executeQuery();
@@ -88,7 +118,7 @@ public class playersController {
     public static void updateUsername(int playerID, String username) {
         try {
             //the username can be updated depending on the PlayerID that is inputted
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Username = ?, WHERE PlayerID = ?");
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Username = ? WHERE PlayerID = ?");
 
             ps.setString(1, username);
             ps.setInt(2, playerID);
@@ -103,7 +133,7 @@ public class playersController {
     public static void updatePassword(int playerID, String password) {
         try {
             //the password can be updated depending on the PlayerID that is inputted
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Password = ?, WHERE PlayerID = ?");
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Password = ? WHERE PlayerID = ?");
 
             checkPassword(password);
 
@@ -123,7 +153,7 @@ public class playersController {
     public static void updateSkin(int playerID, int skinID) {
         try {
             //the skin can be updated depending on the PlayerID that is inputted
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET SkinID = ?, WHERE PlayerID = ?");
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET SkinID = ? WHERE PlayerID = ?");
 
             ps.setInt(1, skinID);
             ps.setInt(2, playerID);
@@ -137,8 +167,8 @@ public class playersController {
     //the updateHighScore function is needed each time the player dies so that their new high score can be saved
     public static void updateHighScore(int playerID, int highScore) {
         try {
-            //the HighScore can be updated depending on the PlayerID that is inputted
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET HighScore = ?, WHERE PlayerID = ?");
+            //the high score can be updated depending on the PlayerID that is inputted
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET HighScore = ? WHERE PlayerID = ?");
 
             ps.setInt(1, highScore);
             ps.setInt(2, playerID);
@@ -152,8 +182,8 @@ public class playersController {
     //the updateCurrency function is needed each time the player dies so that the amount of stars that they collected in that life can be saved
     public static void updateCurrency(int playerID, int currency) {
         try {
-            //the Currency can be updated depending on the PlayerID that is inputted
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Currency = ?, WHERE PlayerID = ?");
+            //the currency can be updated depending on the PlayerID that is inputted
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Currency = ? WHERE PlayerID = ?");
 
             ps.setInt(1, currency);
             ps.setInt(2, playerID);
@@ -178,42 +208,5 @@ public class playersController {
         }
     }
 
-    //this class is needed to extend the Exception class that is part of the regular Java package
-    //by extending the Exception class, a checked exception is defined which means it must be caught or thrown
-    public static class passwordConstraintsException extends Exception {
-        public passwordConstraintsException(String message){
-            //the message parameter is passed into the super class, which is the Exception class
-            super(message);
-        }
-    }
 
-    //the checkPassword function is needed to check that the password follows the constraints set out in phase 1 design
-    public static void checkPassword(String password) throws passwordConstraintsException{
-
-            //all variables these need to be set to false by default before the password can be checked
-            boolean containsUpper = false;
-            boolean containsLower = false;
-            boolean containsDigit = false;
-            boolean correctLength = false;
-
-            //the other constraints don't need to be checked if the basic length check fails
-            if (password.length() >= 8) {
-                correctLength = true;
-                //loops through every single character in the password and checks whether it is uppercase, lowercase or a digit
-                for(int i = 0; i < password.length(); i ++){
-                    char currentCharacter = password.charAt(i);
-                    if (Character.isLowerCase(currentCharacter)) {
-                        containsLower = true;
-                    }else if(Character.isUpperCase(currentCharacter)){
-                        containsUpper = true;
-                    }else if(Character.isDigit(currentCharacter)){
-                        containsDigit = true;
-                    }
-                }
-            }
-            //if any of the variables are false then an exception is thrown, which contains a custom message
-            if (!(containsUpper && containsLower && containsDigit && correctLength)) {
-                throw new passwordConstraintsException("Abort due to constraint violation (Password must be bigger than 8 characters, contain an uppercase and lowercase letter, contain a digit)");
-            }
-    }
 }

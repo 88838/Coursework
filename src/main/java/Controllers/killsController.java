@@ -10,7 +10,7 @@ public class killsController {
 
     public static void createKill(int playerID, int monsterID, int numberOfKills) {
         try {
-            PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Kills (PlayerID, SkinID, NumberOfKills) VALUES (?,?,?)");
+            PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Kills (PlayerID, MonsterID, NumberOfKills) VALUES (?,?,?)");
 
             ps.setInt(1, playerID);
             ps.setInt(2, monsterID);
@@ -45,7 +45,7 @@ public class killsController {
     public static void updateKills(int playerID, int monsterID, int numberOfKills) {
         try {
             //the kills can be updated for each specific monster using the MonsterID
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET NumberOfKills = ? WHERE PlayerID = ? AND WHERE MonsterID = ?");
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Kills SET NumberOfKills = ? WHERE PlayerID = ? AND MonsterID = ?");
 
             ps.setInt(1, numberOfKills);
             ps.setInt(2, playerID);

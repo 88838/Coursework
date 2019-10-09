@@ -26,7 +26,7 @@ public class deathsController {
 
     public static void readDeaths(){
         try{
-            PreparedStatement ps = Main.db.prepareStatement("SELECT PlayerID, LivesLeft, DeathLocationX, DeathLocationY, StageID  FROM Death");
+            PreparedStatement ps = Main.db.prepareStatement("SELECT PlayerID, LivesLeft, DeathLocationX, DeathLocationY, StageID  FROM Deaths");
 
             ResultSet results = ps.executeQuery();
 
@@ -51,7 +51,7 @@ public class deathsController {
     public static void updateDeaths(int playerID, int livesLeft, int deathLocationX, int deathLocationY, int stageID) {
         try {
             //the deaths can be updated depending on the playerID that is inputted
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET DeathLocationX = ?, DeathLocationY = ?, StageID = ? WHERE PlayerID = ? AND WHERE LivesLeft = ?");
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Deaths SET DeathLocationX = ?, DeathLocationY = ?, StageID = ? WHERE PlayerID = ? AND LivesLeft = ?");
 
             ps.setInt(1, deathLocationX);
             ps.setInt(2, deathLocationY);
@@ -65,7 +65,7 @@ public class deathsController {
         }
     }
 
-    public static void deleteKills(int playerID){
+    public static void deleteDeaths(int playerID){
         try {
             PreparedStatement ps = Main.db.prepareStatement("DELETE FROM Deaths WHERE PlayerID = ?");
             ps.setInt(1, playerID);
