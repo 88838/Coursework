@@ -1,16 +1,20 @@
 package Controllers;
 
 import Server.Main;
-import org.json.simple.JSONArray;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+@Path ("players/")
 public class playersController {
 
     //the checkPassword function is needed to check that the password follows the constraints set out in phase 1 design
@@ -53,9 +57,17 @@ public class playersController {
         }
     }
 
+    @POST
+    @Path("new")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
     //the createPlayer function is needed for when the player is creating an account
-    public static void createPlayer(String username, String password) {
+    public String playerNew(
+            @FormDataParam("Username") String username, @FormDataParam("Password") String password) {
         try {
+            if(username == null || password == null){
+                throw new Exception("One or more form data parameters are missing in the HTTP request");
+            }
             //UserID is auto-incrementing so it is not needed in the SQL statement
             //SkinID is assigned a default value in SQL so it is not needed in the SQL statement
             //High Score and Currency can be null, and will have to start off as null because the player will have neither when they create their account, therefore it is also not needed
@@ -73,44 +85,72 @@ public class playersController {
             //this actually execute the SQL
             ps.executeUpdate();
 
-        } catch (SQLException exception) {
+            return "{\"status\": \"OK\"}";
+
+        } catch (Exception exception) {
             //this prints the database error caused by the exception, and the error code in case it isn't clear and needs to be researched
-            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
-        } catch(passwordConstraintsException exception){
-            //this prints out the message that I created in the checkPassword function if the exception is caught
-            System.out.println(exception.getMessage());
+            System.out.println("Database error code: " + exception.getMessage());
+            return "{\"error\": \"Unable to create new player, please see server console for more info.\"}";
         }
     }
 
+    //these annotations turn the method into an HTTP request handler
+    @GET
+    @Path("list")
+    @Produces(MediaType.APPLICATION_JSON)
     //the readPlayers function is needed to print out all the data from the players table
-    public static void readPlayers() {
+    //the method has to be public so the Jersey library can interact with it
+
+    public String playersList() {
+        System.out.println("players/list");
+        //he JSON is prepared using the 'Simple JSON' Library
+        //a JSON array is created using a series of JSON objects with the values from the database
+        JSONArray list = new JSONArray();
         try {
-            //rather than doing select * from, each individual field is in the SQL query, so I can print them out separately to test them
-            PreparedStatement ps = Main.db.prepareStatement("SELECT PlayerID, Username, Password, HighScore, Currency, SkinID  FROM Players");
+            //the SQL statement takes all the values from the Players table except the password because this wouldn't be as secure
+            //the values from the Kills table are also taken
+            //these values are important because they can be used for the leaderboard and for seeing what skin the player has selected, etc.
+            //the JSON array can be split in Javascript for those different uses, rather than having different APIs for each one
+            PreparedStatement psKillInfo = Main.db.prepareStatement("SELECT Players.PlayerID, Kills.NumberOfKills, Kills.MonsterID FROM Players, Kills WHERE Players.PlayerID = Kills.PlayerID");  // info about the players' kills
 
             //results is used to store all of the results of the query
-            ResultSet results = ps.executeQuery();
+            ResultSet killInfoResults = psKillInfo.executeQuery();
+
+            HashMap<Integer, ArrayList<JSONObject>> playerKills = new HashMap<>();
+            while (killInfoResults.next()) {
+                int PlayerID = killInfoResults.getInt(1);
+                if (!playerKills.containsKey(PlayerID)) {
+                    playerKills.put(PlayerID, new ArrayList<JSONObject>());
+                }
+                JSONObject killDetails = new JSONObject();
+                killDetails.put("MonsterID", killInfoResults.getInt(3));
+                killDetails.put("NumberOfKills", killInfoResults.getInt(2));
+                playerKills.get(PlayerID).add(killDetails);
+            }
+
+            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT Players.PlayerID, Players.Username, Players.HighScore, Players.Currency, Players.SkinID FROM Players");  // info about the players
+
+            ResultSet playerInfoResults = psPlayerInfo.executeQuery();
 
             //because results contains all the data, it needs to be split up into rows to get each record from the table
             //this while loop returns false and stops the loop when there are no more records
-            while (results.next()) {
-                //the parameter corresponds with the index of the columns in the table
-                int playerID = results.getInt(1);
-                String username = results.getString(2);
-                String password = results.getString(3);
-                String highScore = results.getString(4);
-                String currency = results.getString(5);
-                int skinID = results.getInt(6);
-                System.out.println("Player ID: " + playerID);
-                System.out.println("Username:  " + username);
-                System.out.println("Password: " + password);
-                System.out.println("High Score: " + highScore);
-                System.out.println("Currency: " + currency);
-                System.out.println("SkinID: " + skinID);
-                System.out.println();
+            while (playerInfoResults.next()) {
+                JSONObject item = new JSONObject();
+                int playerId = playerInfoResults.getInt(1);
+                item.put("PlayerID", playerId);
+                item.put("Username", playerInfoResults.getString(2));
+                item.put("HighScore", playerInfoResults.getString(3));
+                item.put("Currency", playerInfoResults.getString(4));
+                item.put("SkinID", playerInfoResults.getString(5));
+                item.put("Kills", playerKills.get(playerId));
+                list.add(item);
             }
-        } catch (SQLException exception) {
-            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
+            //the method returns a string in terms of JSON
+            return list.toString();
+        } catch (Exception exception) {
+            System.out.println("Database error code: " + exception.getMessage());
+            return "{\"error\": \"Unable to list players, please see server console for more info.\"}";
+
         }
     }
 
