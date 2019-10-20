@@ -57,60 +57,50 @@ public class playersController {
         }
     }
 
+    //these annotations turn the method into an HTTP request handler
     @POST
     @Path("new")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    //the createPlayer function is needed for when the player is creating an account
+    //this method was previously 'createPlayer' however I have now renamed it to be the same format as the API path
     public String playerNew(
             @FormDataParam("Username") String username, @FormDataParam("Password") String password) {
         try {
+            //the API needs to check whether the player has put a username and password, otherwise a player can't be created
             if(username == null || password == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            //UserID is auto-incrementing so it is not needed in the SQL statement
-            //SkinID is assigned a default value in SQL so it is not needed in the SQL statement
-            //High Score and Currency can be null, and will have to start off as null because the player will have neither when they create their account, therefore it is also not needed
-            //the question marks are placeholders
             PreparedStatement ps = Main.db.prepareStatement("INSERT INTO Players (Username, Password) VALUES (?,?)");
 
-            //the checkPassword function is run so that the exception is caught if the password does not meet the constraints
             checkPassword(password);
 
-            //the first parameter corresponds with the index of each question mark
-            //the second parameter is a variable that replaces the question marks
             ps.setString(1, username);
             ps.setString(2, password);
 
-            //this actually execute the SQL
             ps.executeUpdate();
 
             return "{\"status\": \"OK\"}";
 
         } catch (Exception exception) {
-            //this prints the database error caused by the exception, and the error code in case it isn't clear and needs to be researched
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
+            //this will show up on Git Bash because the console will provide more information through the exception message
             return "{\"error\": \"Unable to create new player, please see server console for more info.\"}";
         }
     }
 
-    //these annotations turn the method into an HTTP request handler
+
     @GET
     @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
-    //the readPlayers function is needed to print out all the data from the players table
     //the method has to be public so the Jersey library can interact with it
-
+    //previously called 'readPlayers'
     public String playersList() {
         System.out.println("players/list");
         //he JSON is prepared using the 'Simple JSON' Library
         //a JSON array is created using a series of JSON objects with the values from the database
         JSONArray list = new JSONArray();
         try {
-            //the SQL statement takes all the values from the Players table except the password because this wouldn't be as secure
-            //the values from the Kills table are also taken
-            //these values are important because they can be used for the leaderboard and for seeing what skin the player has selected, etc.
-            //the JSON array can be split in Javascript for those different uses, rather than having different APIs for each one
+            //the JSON array can be split in Javascript for those different uses, rather than having different APIs for each attribute.
             PreparedStatement psKillInfo = Main.db.prepareStatement("SELECT Players.PlayerID, Kills.NumberOfKills, Kills.MonsterID FROM Players, Kills WHERE Players.PlayerID = Kills.PlayerID");  // info about the players' kills
 
             //results is used to store all of the results of the query
