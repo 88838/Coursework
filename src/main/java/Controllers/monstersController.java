@@ -2,35 +2,41 @@ package Controllers;
 
 import Server.Main;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
+@Path ("monsters/")
 public class monstersController {
 
-    public static void readMonsters(){
+    @GET
+    @Path("list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String monstersList(){
+        System.out.println("monsters/list");
+        JSONArray list = new JSONArray();
         try{
-            PreparedStatement ps = Main.db.prepareStatement("SELECT MonsterID, MonsterName, MovementType, AttackType, ImageFile, StageID  FROM Monsters");
+            PreparedStatement psGetMonsters = Main.db.prepareStatement("SELECT MonsterID, MonsterName, MovementType, AttackType, ImageFile, StageID  FROM Monsters");
 
-            ResultSet results = ps.executeQuery();
-            while (results.next()) {
-                int monsterID = results.getInt(1);
-                String monsterName = results.getString(2);
-                String movementType = results.getString(3);
-                String attackType = results.getString(4);
-                String imageFile = results.getString(5);
-                int stageID = results.getInt(6);
-                System.out.println("MonsterID: " + monsterID);
-                System.out.println("Monster Name:  " + monsterName);
-                System.out.println("Movement type: " + movementType);
-                System.out.println("Attack type: " + attackType);
-                System.out.println("Image file: " + imageFile);
-                System.out.println("StageID: " + stageID);
-                System.out.println();
+            ResultSet monstersResults = psGetMonsters.executeQuery();
+            while (monstersResults.next()) {
+                JSONObject item = new JSONObject();
+                item.put("MonsterID", monstersResults.getInt(1));
+                item.put("MonsterName", monstersResults.getString(2));
+                item.put("MovementType", monstersResults.getString(3));
+                item.put("AttackType", monstersResults.getString(4));
+                item.put("ImageFile", monstersResults.getString(5));
+                item.put("StageID", monstersResults.getInt(6));
+                list.add(item);
             }
-        } catch (SQLException exception) {
-            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
+            return list.toString();
+        } catch (Exception exception) {
+            System.out.println("Database error code: " + exception.getMessage());
+            return "{\"error\": \"Unable to list monsters. Please see server console for more info.\"}";
         }
     }
 }
-

@@ -21,11 +21,11 @@ public class playersController {
     public static int identifyPlayer(String token) {
         int playerID = 0;
         try {
-            PreparedStatement psGetPlayerID = Main.db.prepareStatement("SELECT Players.PlayerID FROM Players WHERE Players.Token = ?");
+            PreparedStatement psGetPlayerID = Main.db.prepareStatement("SELECT PlayerID FROM Players WHERE Token = ?");
             psGetPlayerID.setString(1, token);
-            ResultSet results = psGetPlayerID.executeQuery();
-            while (results.next()) {
-                playerID = results.getInt(1);
+            ResultSet playerIDResults = psGetPlayerID.executeQuery();
+            while (playerIDResults.next()) {
+                playerID = playerIDResults.getInt(1);
             }
         } catch (Exception exception) {
             System.out.println("Database error:" + exception.getMessage());
@@ -97,7 +97,7 @@ public class playersController {
                 playerKills.get(playerID).add(killDetails);
             }
 
-            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT Players.PlayerID, Players.Username, Players.HighScore, Players.Currency, Players.SkinID FROM Players");  // info about the players
+            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT PlayerID, Username, HighScore, Currency, SkinID FROM Players");
 
             //there are the results from the PlayerInfo prepared statements
             ResultSet playerInfoResults = psPlayerInfo.executeQuery();
@@ -132,6 +132,7 @@ public class playersController {
     public String playersNew(
             //these are the parameters that will be filled using Git Bash when testing
             @FormDataParam("Username") String username, @FormDataParam("Password") String password) {
+        System.out.println("players/new");
         try {
             //the API needs to check whether the player has put a username and password, otherwise a player can't be created
             if(username == null || password == null){
@@ -145,8 +146,8 @@ public class playersController {
             psNewPlayer.setString(2, password);
             psNewPlayer.executeUpdate();
 
+            //for this API, only a confirmation that everything has worked correctly is needed. This will be the case for all of the APIs that aren't listing anything in JSON
             return "{\"status\": \"OK\"}";
-
         } catch (Exception exception) {
             System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to create new player. Please see server console for more info.\"}";
@@ -161,6 +162,7 @@ public class playersController {
     //the cookie parameter is similar to the form data parameter however will be used specifically for tokens
     public String playersChangeUsername(
             @CookieParam("Token") String token, @FormDataParam("NewUsername") String newUsername) {
+        System.out.println("players/changeUsername");
         try {
             if(token == null || newUsername == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
@@ -168,14 +170,12 @@ public class playersController {
             int playerID = playersController.identifyPlayer(token);
 
             //this SQL statement gets the username of the player that was just identified
-            PreparedStatement psGetOldUsername = Main.db.prepareStatement("SELECT Players.Username FROM Players WHERE Players.PlayerID = ?");
-
+            PreparedStatement psGetOldUsername = Main.db.prepareStatement("SELECT Username FROM Players WHERE PlayerID = ?");
             psGetOldUsername.setInt(1, playerID);
-            ResultSet results = psGetOldUsername.executeQuery();
-
+            ResultSet oldUsernameResults = psGetOldUsername.executeQuery();
             String oldUsername = "";
-            while (results.next()) {
-                oldUsername = results.getString(1);
+            while (oldUsernameResults.next()) {
+                oldUsername = oldUsernameResults.getString(1);
             }
 
             //if the new username is the same as the old username an error is returned
@@ -184,7 +184,6 @@ public class playersController {
             }
 
             PreparedStatement psChangeUsername = Main.db.prepareStatement("UPDATE Players SET Username = ? WHERE PlayerID = ?");
-
             psChangeUsername.setString(1, newUsername);
             psChangeUsername.setInt(2, playerID);
             psChangeUsername.executeUpdate();
@@ -203,20 +202,20 @@ public class playersController {
     //this method was previously 'updatePassword' however I have now renamed it to be the same format as the API path
     public String playersChangePassword(
             @CookieParam("Token") String token, @FormDataParam("NewPassword") String newPassword) {
+        System.out.println("players/changePassword");
         try {
             if(token == null || newPassword == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
             int playerID = playersController.identifyPlayer(token);
 
-            PreparedStatement psGetOldPassword = Main.db.prepareStatement("SELECT Players.Password FROM Players WHERE Players.PlayerID = ?");
-
+            PreparedStatement psGetOldPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
             psGetOldPassword.setInt(1, playerID);
-            ResultSet results = psGetOldPassword.executeQuery();
+            ResultSet oldPasswordResults = psGetOldPassword.executeQuery();
 
             String oldPassword = "";
-            while (results.next()) {
-                oldPassword = results.getString(1);
+            while (oldPasswordResults.next()) {
+                oldPassword = oldPasswordResults.getString(1);
             }
 
             //if the new password is the same as the old password an error is returned
@@ -247,6 +246,7 @@ public class playersController {
     //this method was previously 'updateSkin' however I have now renamed it to be the same format as the API path
     public String playersChangeSkin(
             @CookieParam("Token") String token, @FormDataParam("SkinID") String skinIDTemp) {
+        System.out.println("players/changeSkin");
         try {
             if(token == null || skinIDTemp == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
@@ -258,18 +258,18 @@ public class playersController {
             int playerID = playersController.identifyPlayer(token);
 
             //this sql statement checks whether a player with the PlayerID owns a skin with the SkinID
-            PreparedStatement psCheckUnlockedSkin = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players INNER JOIN UnlockedSkins ON ? = UnlockedSkins.PlayerID and UnlockedSkins.SkinID = ?)");
+            PreparedStatement psCheckUnlockedSkin = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM UnlockedSkins WHERE PlayerID = ? and SkinID = ?)");
 
             psCheckUnlockedSkin.setInt(1, playerID);
             psCheckUnlockedSkin.setInt(2, skinID);
-            ResultSet results = psCheckUnlockedSkin.executeQuery();
+            ResultSet unlockedSkinResults = psCheckUnlockedSkin.executeQuery();
 
-            //if the player doesn't own the skin then an error is returned
             int exists = 0;
-            while (results.next()) {
-                exists = results.getInt(1);
+            while (unlockedSkinResults.next()) {
+                exists = unlockedSkinResults.getInt(1);
             }
 
+            //if the player doesn't own the skin then an error is returned
             if(exists==0){
                 //the skin with SkinID 1 is automatically unlocked because it is the default, so it doesn't need to be in the UnlockedSkins table
                 if(skinID != 1) {
@@ -296,6 +296,7 @@ public class playersController {
     @Produces(MediaType.APPLICATION_JSON)
     public String playersUpdateHighScore(
             @CookieParam("Token") String token, @FormDataParam("NewHighScore") String newHighScoreTemp) {
+        System.out.println("players/updateHighScore");
         try {
             if(token == null || newHighScoreTemp == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
@@ -323,6 +324,7 @@ public class playersController {
     @Produces(MediaType.APPLICATION_JSON)
     public String playersUpdateCurrency(
             @CookieParam("Token") String token, @FormDataParam("SessionCurrency") String sessionCurrencyTemp) {
+        System.out.println("players/updateCurrency");
         try {
             if(token == null || sessionCurrencyTemp == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
@@ -331,14 +333,14 @@ public class playersController {
             int sessionCurrency = Integer.parseInt(sessionCurrencyTemp);
             int playerID = playersController.identifyPlayer(token);
 
-            PreparedStatement psGetOldCurrency = Main.db.prepareStatement("SELECT Players.Currency FROM Players WHERE Players.PlayerID = ?");
+            PreparedStatement psGetOldCurrency = Main.db.prepareStatement("SELECT Currency FROM Players WHERE PlayerID = ?");
 
             psGetOldCurrency.setInt(1, playerID);
-            ResultSet results = psGetOldCurrency.executeQuery();
+            ResultSet oldCurrencyResults = psGetOldCurrency.executeQuery();
 
             int oldCurrency = 0;
-            while (results.next()) {
-                oldCurrency = results.getInt(1);
+            while (oldCurrencyResults.next()) {
+                oldCurrency = oldCurrencyResults.getInt(1);
             }
 
             //the old currency of the player and the currency that they just got in their last life are added together to form a new currency
@@ -362,20 +364,21 @@ public class playersController {
     @Produces(MediaType.APPLICATION_JSON)
     public String playersDelete(
             @CookieParam("Token") String token, @FormDataParam("Password") String password) {
+        System.out.println("players/delete");
         try {
             if(token == null || password == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
             int playerID = playersController.identifyPlayer(token);
 
-            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Players.Password FROM Players WHERE Players.PlayerID = ?");
+            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
 
             psGetPassword.setInt(1, playerID);
-            ResultSet results = psGetPassword.executeQuery();
+            ResultSet passwordResults = psGetPassword.executeQuery();
 
             String correctPassword = "";
-            while (results.next()) {
-                correctPassword = results.getString(1);
+            while (passwordResults.next()) {
+                correctPassword = passwordResults.getString(1);
             }
 
             //if the password doesn't match the password in the database then it is incorrect and an error is returned
@@ -425,6 +428,7 @@ public class playersController {
     @Produces(MediaType.APPLICATION_JSON)
     public String playersLogin(
             @FormDataParam("Username") String username, @FormDataParam("Password") String password) {
+        System.out.println("players/login");
         try {
             if(username == null || password == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
@@ -449,7 +453,7 @@ public class playersController {
             }
 
             //this sql statement is similar to the one in the identifyPlayer() method, however this time it's identifying the player based on their username instead of their token
-            PreparedStatement psGetPlayerID = Main.db.prepareStatement("SELECT Players.PlayerID FROM Players WHERE Players.Username = ?");
+            PreparedStatement psGetPlayerID = Main.db.prepareStatement("SELECT PlayerID FROM Players WHERE Username = ?");
             psGetPlayerID.setString(1, username);
 
             int playerID = 0;
@@ -459,7 +463,7 @@ public class playersController {
             }
 
             //similar code the players/delete API
-            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Players.Password FROM Players WHERE Players.PlayerID = ?");
+            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
 
             psGetPassword.setInt(1, playerID);
             ResultSet passwordResults = psGetPassword.executeQuery();
@@ -487,6 +491,4 @@ public class playersController {
             return "{\"error\": \"Unable to login. Please see server console for more info.\"}";
         }
     }
-
-
 }

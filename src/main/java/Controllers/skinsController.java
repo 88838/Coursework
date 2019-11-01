@@ -2,32 +2,38 @@ package Controllers;
 
 import Server.Main;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
+@Path ("skins/")
 public class skinsController {
 
-    public static void readSkins(){
+    @GET
+    @Path("list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String skinsList(){
+        System.out.println("skins/list");
+        JSONArray list = new JSONArray();
         try{
-            PreparedStatement ps = Main.db.prepareStatement("SELECT SkinID, SkinName, ImageFile, Cost  FROM Skins");
-
-            ResultSet results = ps.executeQuery();
-
-            while (results.next()) {
-
-                int skinID = results.getInt(1);
-                String skinName = results.getString(2);
-                String imageFile = results.getString(3);
-                int cost = results.getInt(4);
-                System.out.println("SkinID: " + skinID);
-                System.out.println("Skin Name:  " + skinName);
-                System.out.println("Image File: " + imageFile);
-                System.out.println("Cost: " + cost);
-                System.out.println();
+            PreparedStatement psGetSkins = Main.db.prepareStatement("SELECT SkinID, SkinName, ImageFile, Cost  FROM Skins");
+            ResultSet skinsResults = psGetSkins.executeQuery();
+            while (skinsResults.next()) {
+                JSONObject item = new JSONObject();
+                item.put("SkinID", skinsResults.getInt(1));
+                item.put("SkinName", skinsResults.getString(2));
+                item.put("ImageFile", skinsResults.getString(3));
+                item.put("Cost", skinsResults.getInt(4));
+                list.add(item);
             }
-        } catch (SQLException exception) {
-            System.out.println("Database error code " + exception.getErrorCode() + ": " + exception.getMessage());
+            return list.toString();
+        } catch (Exception exception) {
+            System.out.println("Database error code: " + exception.getMessage());
+            return "{\"error\": \"Unable to list skins. Please see server console for more info.\"}";
         }
     }
 }
