@@ -10,9 +10,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 @Path ("players/")
 public class playersController {
@@ -257,12 +257,14 @@ public class playersController {
             int skinID = Integer.parseInt(skinIDTemp);
             int playerID = playersController.identifyPlayer(token);
 
+            //this sql statement checks whether a player with the PlayerID owns a skin with the SkinID
             PreparedStatement psCheckUnlockedSkin = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players INNER JOIN UnlockedSkins ON ? = UnlockedSkins.PlayerID and UnlockedSkins.SkinID = ?)");
 
             psCheckUnlockedSkin.setInt(1, playerID);
             psCheckUnlockedSkin.setInt(2, skinID);
             ResultSet results = psCheckUnlockedSkin.executeQuery();
 
+            //if the player doesn't own the skin then an error is returned
             int exists = 0;
             while (results.next()) {
                 exists = results.getInt(1);
@@ -380,19 +382,109 @@ public class playersController {
             if (!(password.equals(correctPassword))){
                 return "{\"error\": \"Unable to delete player. Incorrect password.\"}";
             }
-            //all the records referring to the PlayerID are deleted
-            PreparedStatement psDeletePlayer = Main.db.prepareStatement("BEGIN TRANSACTION;\n DELETE FROM UnlockedSkins WHERE PlayerID = ?;\n DELETE FROM Kills WHERE PlayerID = ?;\n DELETE FROM Deaths WHERE PlayerID = ?;\n DELETE FROM Players WHERE PlayerID = ?;\n END TRANSACTION;");
+            try {
+                //start of transaction
+                Main.db.setAutoCommit(false);
 
-            psDeletePlayer.setInt(1, playerID);
-            psDeletePlayer.setInt(2, playerID);
-            psDeletePlayer.setInt(3, playerID);
-            psDeletePlayer.setInt(4, playerID);
-            psDeletePlayer.executeUpdate();
+                //all the prepared statements are done in the same order as when it was a transaction
+                PreparedStatement psDeleteFromUnlockedSkins = Main.db.prepareStatement("DELETE FROM UnlockedSkins WHERE PlayerID = ?");
+                psDeleteFromUnlockedSkins.setInt(1, playerID);
+                psDeleteFromUnlockedSkins.executeUpdate();
+
+                PreparedStatement psDeleteFromKills = Main.db.prepareStatement("DELETE FROM Kills WHERE PlayerID = ?");
+                psDeleteFromKills.setInt(1, playerID);
+                psDeleteFromKills.executeUpdate();
+
+                PreparedStatement psDeleteFromDeaths = Main.db.prepareStatement("DELETE FROM Deaths WHERE PlayerID = ?");
+                psDeleteFromDeaths.setInt(1, playerID);
+                psDeleteFromDeaths.executeUpdate();
+
+                PreparedStatement psDeleteFromPlayers = Main.db.prepareStatement("DELETE FROM Players WHERE PlayerID = ?");
+                psDeleteFromPlayers.setInt(1, playerID);
+                psDeleteFromPlayers.executeUpdate();
+
+                //end of transaction
+                Main.db.commit();
+            }catch (Exception exception){
+                //if anything goes wrong, then none of the changes will commit and the database will roll back to it's previous stable state
+                Main.db.rollback();
+                System.out.println("Database error: " + exception.getMessage());
+                return "{\"error\": \"Unable to delete player. Please see server console for more info.\"}";
+            }
 
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
             System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to delete player. Please see server console for more info.\"}";
+        }
+    }
+
+    @POST
+    @Path("login")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String playersLogin(
+            @FormDataParam("Username") String username, @FormDataParam("Password") String password) {
+        try {
+            if(username == null || password == null){
+                throw new Exception("One or more form data parameters are missing in the HTTP request");
+            }
+
+            //this sql statement checks whether the player with that username exists
+            PreparedStatement psCheckUsername = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE Username = ?)");
+            psCheckUsername.setString(1, username);
+
+            //similar code to the players/updateSkin API
+            ResultSet usernameResults = psCheckUsername.executeQuery();
+            int exists = 0;
+            while (usernameResults.next()) {
+                exists = usernameResults.getInt(1);
+            }
+
+            //if the username doesn't exist then an error is returned
+            if(exists==0){
+                 {
+                    return "{\"error\": \"Unable to login. Player does not exist.\"}";
+                }
+            }
+
+            //this sql statement is similar to the one in the identifyPlayer() method, however this time it's identifying the player based on their username instead of their token
+            PreparedStatement psGetPlayerID = Main.db.prepareStatement("SELECT Players.PlayerID FROM Players WHERE Players.Username = ?");
+            psGetPlayerID.setString(1, username);
+
+            int playerID = 0;
+            ResultSet playerIDResults = psGetPlayerID.executeQuery();
+            while (playerIDResults.next()) {
+                playerID = playerIDResults.getInt(1);
+            }
+
+            //similar code the players/delete API
+            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Players.Password FROM Players WHERE Players.PlayerID = ?");
+
+            psGetPassword.setInt(1, playerID);
+            ResultSet passwordResults = psGetPassword.executeQuery();
+
+            String correctPassword = "";
+            while (passwordResults.next()) {
+                correctPassword = passwordResults.getString(1);
+            }
+
+            if (!(password.equals(correctPassword))){
+                return "{\"error\": \"Unable to login. Incorrect password.\"}";
+            }
+
+            //this generates a random Universally Unique Identifier
+            String token  = UUID.randomUUID().toString();
+
+            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET Token = ? WHERE PlayerID = ?");
+            psUpdateToken.setString(1, token);
+            psUpdateToken.setInt(2, playerID);
+            psUpdateToken.executeUpdate();
+
+            return "{\"Token\": \"" + token + "\"}";
+        } catch (Exception exception) {
+            System.out.println("Database error: " + exception.getMessage());
+            return "{\"error\": \"Unable to login. Please see server console for more info.\"}";
         }
     }
 
