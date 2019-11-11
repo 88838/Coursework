@@ -491,4 +491,61 @@ public class playersController {
             return "{\"error\": \"Unable to login. Please see server console for more info.\"}";
         }
     }
+
+    @POST
+    @Path("checkToken")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String playersCheckToken(
+            @CookieParam("Token") String token) {
+        System.out.println("players/checkToken");
+        try {
+            if(token == null){
+                throw new Exception("One or more form data parameters are missing in the HTTP request");
+            }
+
+            PreparedStatement psCheckToken = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE Token = ?)");
+            psCheckToken.setString(1, token);
+
+            ResultSet tokenResults = psCheckToken.executeQuery();
+            int exists = 0;
+            while (tokenResults.next()) {
+                exists = tokenResults.getInt(1);
+            }
+
+            if(exists==0){
+                {
+                    return "{\"error\": \"Player is not logged in.\"}";
+                }
+            }
+
+            return "{\"status\": \"OK\"}";
+        } catch (Exception exception) {
+            System.out.println("Database error: " + exception.getMessage());
+            return "{\"error\": \"Unable to login. Please see server console for more info.\"}";
+        }
+    }
+
+    @POST
+    @Path("logout")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String playersLogout(
+            @CookieParam("Token") String token) {
+        System.out.println("players/logout");
+        try {
+            if(token == null){
+                throw new Exception("One or more form data parameters are missing in the HTTP request");
+            }
+            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET Token = ? WHERE Token = ?");
+            psUpdateToken.setString(1, null);
+            psUpdateToken.setString(2, token);
+            psUpdateToken.executeUpdate();
+
+            return "{\"status\": \"OK\"}";
+        } catch (Exception exception) {
+            System.out.println("Database error code: " + exception.getMessage());
+            return "{\"error\": \"Unable to logout. Please see server console for more info.\"}";
+        }
+    }
 }
