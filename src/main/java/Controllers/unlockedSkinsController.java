@@ -22,11 +22,11 @@ public class unlockedSkinsController {
         JSONArray list = new JSONArray();
         try{
             PreparedStatement psGetUnlockedSkins = Main.db.prepareStatement("SELECT PlayerID, SkinID  FROM UnlockedSkins");
-            ResultSet unlockedSkinsresults = psGetUnlockedSkins.executeQuery();
-            while (unlockedSkinsresults.next()) {
+            ResultSet unlockedSkinsResults = psGetUnlockedSkins.executeQuery();
+            while (unlockedSkinsResults.next()) {
                 JSONObject item = new JSONObject();
-                item.put("PlayerID", unlockedSkinsresults.getInt(1));
-                item.put("SkinID", unlockedSkinsresults.getInt(2));
+                item.put("PlayerID", unlockedSkinsResults.getInt(1));
+                item.put("SkinID", unlockedSkinsResults.getInt(2));
                 list.add(item);
             }
             return list.toString();
