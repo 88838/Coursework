@@ -1,18 +1,27 @@
-body {
-    background-color: navy;
-    margin: 0;
-    font-family: 'Arial', serif;
+@font-face {
+    font-family: 'squarewave-bold';
+    src: url('http://localhost:8081/client/css/fonts/squarewave-bold.woff2') format('woff2'),
+    url('http://localhost:8081/client/fonts/squarewave-bold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
 }
 
-h1 {
-    margin-top:0;
+body {
+    background-color: black;
+    margin: 0;
+    color : white;
+    font-family: 'squarewave', serif;
+}
+.option {
+    font-size: 100px;
+    margin: auto;
+    width: 50%;
+    text-align: center;
 }
 
 #content {
-    background-color: white;
-    width: 1000px;
-    margin: 0 auto;
-    min-height: 600px;
-    padding: 32px;
+    margin: auto;
+    width: 50%;
+    background-color: black;
 }
 

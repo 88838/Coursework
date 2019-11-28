@@ -1,16 +1,16 @@
+let w = 0, h = 0;
+
 function pageLoad() {
-
-    let now = new Date();
-
-    let myHTML = '<div style="text-align:center;">'
-        + '<h1>Welcome to my API powered website!</h1>'
-        + '<img src="/client/img/logo screenshot.png"  alt="Logo"/>'
-        + '<div style="font-style: italic;">'
-        + 'Generated at ' + now.toLocaleTimeString()
-        + '</div>'
-        + '</div>';
-
-    document.getElementById("testDiv").innerHTML = myHTML;
-
+    window.addEventListener("resize", fixSize);
+    fixSize();
 }
+function fixSize() {
+    w = window.innerWidth;
+    h = window.innerHeight;
+
+    const content = document.getElementById('content');
+    content.width = w;
+    content.height = h;
+}
+
 
