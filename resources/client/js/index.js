@@ -5,12 +5,7 @@ function pageLoad() {
     fixSize();
 }
 function fixSize() {
-    w = window.innerWidth;
-    h = window.innerHeight;
-
-    const content = document.getElementById('content');
-    content.width = w;
-    content.height = h;
+    console.log("Resizing!");
 }
 
 

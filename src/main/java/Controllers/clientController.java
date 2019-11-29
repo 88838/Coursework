@@ -24,6 +24,13 @@ public class clientController {
     }
 
     @GET
+    @Path("fonts/{path}")
+    @Produces({"font/opentype"})
+    public byte[] getFontFile(@PathParam("path") String path) {
+        return getFile("client/fonts/" + path);
+    }
+
+    @GET
     @Path("js/{path}")
     @Produces({"text/javascript"})
     public byte[] getJavaScriptFile(@PathParam("path") String path) {
