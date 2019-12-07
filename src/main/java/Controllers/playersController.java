@@ -537,9 +537,8 @@ public class playersController {
             if(token == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET Token = ? WHERE Token = ?");
-            psUpdateToken.setString(1, null);
-            psUpdateToken.setString(2, token);
+            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET Token = NULL WHERE Token = ?");
+            psUpdateToken.setString(1, token);
             psUpdateToken.executeUpdate();
 
             return "{\"status\": \"OK\"}";

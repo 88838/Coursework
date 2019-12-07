@@ -25,7 +25,9 @@ public class clientController {
 
     @GET
     @Path("fonts/{path}")
+    //this allows any font file type to be used
     @Produces({"font/opentype"})
+    //the font is stored in the font folder within the client folder
     public byte[] getFontFile(@PathParam("path") String path) {
         return getFile("client/fonts/" + path);
     }

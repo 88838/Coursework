@@ -2,27 +2,28 @@
 <html>
 
 <head>
-    <title>Terminal Velocity</title>
+    <title>Main Menu</title>
     <link rel="stylesheet" type="text/css" href="/client/css/styles.css">
+    <script src="/client/js/js.cookie.js"></script>
     <script src="/client/js/index.js"></script>
     <link rel="shortcut icon" href="/client/favicon.ico" type="image/x-icon">
-
 </head>
-
+<!--there is no javascript yet, but there will be a function that will run when the page loads-->
 <body onload="pageLoad()">
-    <div id="content">
-
+    <!--this is the div containing all of the content of the page-->
+    <divclass="content">
+        <!--there are two divs, one for the logo and one for the options-->
         <div id="logoDiv">
             <img src="img/logo.png">
         </div>
-
-        <div id="options">
+        <div class="options">
+            <!--all the options have the class option so that they can be accessed through css-->
+            <!--the span tag is used as a container here so that the size of where you can hover is restricted to the actual content within the div-->
             <div ><span id="startOption" class="option">start</span></div>
             <div ><span id="shopOption" class="option">shop</span></div>
             <div ><span id="leaderboardOption" class="option">leaderboard</span></div>
             <div ><span id="settingsOption" class="option">settings</span></div>
         </div>
-
     </div>
 </body>
 

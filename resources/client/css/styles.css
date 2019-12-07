@@ -1,3 +1,4 @@
+/*I added the font face using .woff files, which I generated using https://www.fontsquirrel.com/tools/webfont-generator*/
 @font-face {
     font-family: 'squarewave-bold';
     src: url('/client/fonts/squarewave-bold.woff2') format('woff2'),
@@ -5,45 +6,68 @@
     font-weight: normal;
     font-style: normal;
 }
-
 body {
-    /*background-color: red;*/
     background-color: black;
     margin: 0;
+    /*all the text within the page will be white, and use the squarewave font*/
     color : white;
     font-family: 'squarewave-bold', serif;
 }
-
-#content {
+.content {
     margin: auto;
-    width: 60%;
+    width: 80%;
     background-color: black;
+    /*the content must be a certain amount of pixels, which will change when resizing
+    this allows for more usability and readability because the content will not shrink*/
     min-width: 800px;
 }
-
 .option{
     font-size: 65pt;
-/*    background-color: blue;*/
 }
 .option:hover {
+    /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
     text-shadow:-5px 5px #c0006f;
 }
-#options {
-  /*  background-color: cyan;*/
+
+.options {
+    /*the options div is 50%  width of the content div*/
+    width: 50%;
+    text-align: center;
+    margin: auto;
+    /*the options have to be a minimum of 15% of the content div*/
+    min-width: 15%;
+}
+#optionsLogin {
+    margin-top: 8%;
+}
+#logoDiv {
+    width: 100%;
+    /*the logo div is 8% from the top, which then also pushes the options down as well*/
+    margin-top: 8%;
+    text-align: center;
+}
+#logoDiv img {
+    width: 55%;
+    /*some padding is needed in order to make the image aligned properly*/
+    padding:2%;
+}
+.form {
+    font-size: 50pt;
     width: 50%;
     text-align: center;
     margin: auto;
     min-width: 15%;
 }
 
-#logoDiv {
-    width: 100%;
-    margin-top: 10%;
-    text-align: center;
-    /*background-color: red;*/
+#loginForm{
+    margin-top: 20%;
 }
-#logoDiv img {
-    width: 85%;
-  /*  background-color: lime;*/
-    padding:2%;
+#passwordDiv{
+    background-color: blue;
+}
+#usernameDiv{
+    background-color: red;
+}
+#loginConfirm{
+    margin-top:50px;
 }
