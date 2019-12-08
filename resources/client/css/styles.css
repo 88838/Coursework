@@ -23,6 +23,9 @@ body {
 }
 .option{
     font-size: 65pt;
+    /*these two styling changes prevent the player from selecting the text, and also changes the cursor to a pointer, like a regular button would*/
+    cursor: pointer;
+    user-select: none;
 }
 .option:hover {
     /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
@@ -37,9 +40,7 @@ body {
     /*the options have to be a minimum of 15% of the content div*/
     min-width: 15%;
 }
-#optionsLogin {
-    margin-top: 8%;
-}
+
 #logoDiv {
     width: 100%;
     /*the logo div is 8% from the top, which then also pushes the options down as well*/
@@ -51,23 +52,29 @@ body {
     /*some padding is needed in order to make the image aligned properly*/
     padding:2%;
 }
-.form {
+
+/*------------login.html--------------*/
+#optionsLogin {
+    margin-top: 5%;
+}
+#loginForm{
     font-size: 50pt;
     width: 50%;
     text-align: center;
     margin: auto;
+    padding-top: 25%;
     min-width: 15%;
 }
-
-#loginForm{
-    margin-top: 20%;
+.input{
+    padding: 10px 10px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 5px #c0006f;
 }
-#passwordDiv{
+/*#loginConfirm{
     background-color: blue;
 }
-#usernameDiv{
+#signUpConfirm{
     background-color: red;
-}
-#loginConfirm{
-    margin-top:50px;
-}
+}*/

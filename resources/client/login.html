@@ -9,28 +9,40 @@
 </head>
 <body onload="pageLoad()">
     <div class="content">
-        <div id="logoDiv">
-            <img src="img/logo.png">
+
+        <!--this div just contains the logo and the two options of logging in or signing up-->
+        <div id="loginDiv">
+            <div id="logoDiv">
+                <img src="img/logo.png">
+            </div>
+
+            <div id="optionsLogin" class="options">
+                <div ><span id="loginOption" class="option">login</span></div>
+                <div ><span id="signUpOption" class="option">sign up</span></div>
+            </div>
         </div>
-        <div id="optionsLogin" class="options">
-            <!--all the options have the class option so that they can be accessed through css-->
-            <!--the span tag is used as a container here so that the size of where you can hover is restricted to the actual content within the div-->
-            <div ><span id="loginOption" class="option">login</span></div>
-            <div ><span id="signUpOption" class="option">sign up</span></div>
-        </div>
-       <div id="loginDiv" style="display: none;">
-           <form id="loginForm" class="form">
-                <div id="usernameDiv">
-                    <label for="usernameInput">username </label>
-                    <input type="text" name="username" id="usernameInput">
-                </div>
-                <div id="passwordDiv">
-                    <label for="passwordInput">password </label>
-                    <input type="password" name="password" id="passwordInput">
-                </div>
-                <div id="loginConfirm"><span class="option" onclick="alert('Snarf')">login</span></div>
-            </form>
-       </div>
+
+        <!--this form is originally hidden when the player is sent to the login page-->
+        <form id="loginForm" class="form" style="display: none;">
+
+            <!--the player has to fill out their username and password using the html inputs-->
+            <div id="usernameDiv">
+                <label for="usernameInput">username </label>
+                <input type="text" name="username" id="usernameInput" class="input">
+            </div>
+            <div id="passwordDiv">
+                <label for="passwordInput">password </label>
+                <!--when the input type is "password", the password is censored dynamically when typing it in-->
+                <input type="password" name="password" id="passwordInput" class="input">
+            </div>
+
+            <!--the player will have different options shown to them depending on whether they presses log in or sign up previously-->
+            <div id="loginConfirm"><span class="option" >login</span></div>
+            <div id="signUpConfirm"><span class="option" >sign up</span></div>
+            <!--when the player presses this button, they can return to the previous screen-->
+            <div id="cancelOption"><span class="option" >cancel</span></div>
+        </form>
+
     </div>
 </body>
 </html>
