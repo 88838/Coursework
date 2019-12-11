@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 @Path ("skins/")
-public class skinsController {
+public class SkinsController {
 
     @GET
     @Path("list")

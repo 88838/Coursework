@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 @Path ("kills/")
-public class killsController {
+public class KillsController {
 
     @POST
     @Path("update")
@@ -24,7 +24,7 @@ public class killsController {
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
 
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
             int monsterID = Integer.parseInt(monsterIDTemp);
             int sessionKills = Integer.parseInt(sessionKillsTemp);
 

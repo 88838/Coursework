@@ -14,7 +14,7 @@ import java.io.IOException;
  You shouldn't need to change anything unless you are adding other file types.
  ------------------------------------------------------------------------------ */
 @Path("client/")
-public class clientController {
+public class ClientController {
 
     @GET
     @Path("img/{path}")

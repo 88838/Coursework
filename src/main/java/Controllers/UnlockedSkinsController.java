@@ -12,7 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 @Path ("unlockedSkins/")
-public class unlockedSkinsController {
+public class UnlockedSkinsController {
 
     @GET
     @Path("list")
@@ -49,7 +49,7 @@ public class unlockedSkinsController {
             }
 
             int skinID = Integer.parseInt(skinIDTemp);
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
 
             PreparedStatement psGetSkinID = Main.db.prepareStatement("SELECT SkinID FROM UnlockedSkins WHERE PlayerID = ?");
             psGetSkinID.setInt(1, playerID);

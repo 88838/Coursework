@@ -15,11 +15,10 @@ body {
 }
 .content {
     margin: auto;
-    width: 80%;
-    background-color: black;
+    width: 1200px;
+    min-width: 1200px;
     /*the content must be a certain amount of pixels, which will change when resizing
     this allows for more usability and readability because the content will not shrink*/
-    min-width: 800px;
 }
 .option{
     font-size: 65pt;
@@ -44,7 +43,7 @@ body {
 #logoDiv {
     width: 100%;
     /*the logo div is 8% from the top, which then also pushes the options down as well*/
-    margin-top: 8%;
+    margin-top: 9%;
     text-align: center;
 }
 #logoDiv img {
@@ -54,9 +53,7 @@ body {
 }
 
 /*------------login.html--------------*/
-#optionsLogin {
-    margin-top: 5%;
-}
+
 #loginForm{
     font-size: 50pt;
     width: 50%;
@@ -72,9 +69,14 @@ body {
     border: none;
     border-bottom: 5px #c0006f;
 }
-/*#loginConfirm{
-    background-color: blue;
+/*the game*/
+#gameCanvas{
+    margin-top: 6%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 1200px;
+    height:600px;
+    border:5px solid #c0006f;
 }
-#signUpConfirm{
-    background-color: red;
-}*/
+

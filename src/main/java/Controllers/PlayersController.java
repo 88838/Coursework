@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 @Path ("players/")
-public class playersController {
+public class PlayersController {
 
     //this method is used to get the PlayerID using the token of the login session and will be used several times
     public static int identifyPlayer(String token) {
@@ -167,7 +167,7 @@ public class playersController {
             if(token == null || newUsername == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
 
             //this SQL statement gets the username of the player that was just identified
             PreparedStatement psGetOldUsername = Main.db.prepareStatement("SELECT Username FROM Players WHERE PlayerID = ?");
@@ -207,7 +207,7 @@ public class playersController {
             if(token == null || newPassword == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
 
             PreparedStatement psGetOldPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
             psGetOldPassword.setInt(1, playerID);
@@ -255,7 +255,7 @@ public class playersController {
             //the only way to check if the parameter is in the HTTP request is to have it as a string because it is a non-primitive data type
             //for the purposes of the rest of the API method, skinID has to be an integer
             int skinID = Integer.parseInt(skinIDTemp);
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
 
             //this sql statement checks whether a player with the PlayerID owns a skin with the SkinID
             PreparedStatement psCheckUnlockedSkin = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM UnlockedSkins WHERE PlayerID = ? and SkinID = ?)");
@@ -303,7 +303,7 @@ public class playersController {
             }
 
             int newHighScore = Integer.parseInt(newHighScoreTemp);
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
 
             PreparedStatement psUpdateHighScore = Main.db.prepareStatement("UPDATE Players SET HighScore = ? WHERE PlayerID = ?");
 
@@ -331,7 +331,7 @@ public class playersController {
             }
 
             int sessionCurrency = Integer.parseInt(sessionCurrencyTemp);
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
 
             PreparedStatement psGetOldCurrency = Main.db.prepareStatement("SELECT Currency FROM Players WHERE PlayerID = ?");
 
@@ -369,7 +369,7 @@ public class playersController {
             if(token == null || password == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
 
             PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
 
@@ -492,16 +492,16 @@ public class playersController {
         }
     }
 
-    @POST
+    @GET
     @Path("checkToken")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String playersCheckToken(
-            @CookieParam("Token") String token) {
+            @CookieParam("token") String token) {
         System.out.println("players/checkToken");
         try {
             if(token == null){
-                throw new Exception("One or more form data parameters are missing in the HTTP request");
+                return "{\"error\": \"Player is not logged in.\"}";
             }
 
             PreparedStatement psCheckToken = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE Token = ?)");
@@ -522,7 +522,7 @@ public class playersController {
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
             System.out.println("Database error: " + exception.getMessage());
-            return "{\"error\": \"Unable to login. Please see server console for more info.\"}";
+            return "{\"error\": \"Unable to check token. Please see server console for more info.\"}";
         }
     }
 

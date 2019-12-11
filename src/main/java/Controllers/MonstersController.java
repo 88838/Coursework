@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 @Path ("monsters/")
-public class monstersController {
+public class MonstersController {
 
     @GET
     @Path("list")

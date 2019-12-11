@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 @Path ("stages/")
-public class stagesController {
+public class StagesController {
 
     @GET
     @Path("list")

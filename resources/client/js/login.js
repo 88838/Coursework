@@ -4,7 +4,8 @@ function pageLoad() {
     document.getElementById("signUpOption").addEventListener("click", function() {showDiv("signUp");});
     document.getElementById("cancelOption").addEventListener("click",function() {showDiv("cancel");});
 
-    document.getElementById("loginConfirm").addEventListener("click", login);
+    document.getElementById("loginConfirm").addEventListener("click", function() {processPlayerData("login");});
+    document.getElementById("signUpConfirm").addEventListener("click", function() {processPlayerData("signUp");});
 }
 
 function showDiv(optionType) {
@@ -29,21 +30,37 @@ function showDiv(optionType) {
     }
 }
 
-function login() {
-
-/*    event.preventDefault();*/
+function processPlayerData(processType) {
 
     const form = document.getElementById("loginForm");
     const formData = new FormData(form);
 
-    fetch("/players/login", {method: 'post', body: formData}
+    if(processType=="login"){
+        login("/players/login", formData);
+    }else if(processType=="signUp"){
+        fetch("/players/new", {method: 'post', body: formData}
+        ).then(response => response.json()
+        ).then(responseData => {
+
+            if (responseData.hasOwnProperty('error')) {
+                alert(responseData.error);
+            } else {
+                login("/players/login", formData);
+            }
+        });
+    }
+
+
+}
+function login(apiPath, formData){
+    fetch(apiPath, {method: 'post', body: formData}
     ).then(response => response.json()
     ).then(responseData => {
 
         if (responseData.hasOwnProperty('error')) {
             alert(responseData.error);
         } else {
-            Cookies.set("token", responseData.token);
+            Cookies.set("token", responseData.Token);
 
             window.location.href = '/client/index.html';
         }

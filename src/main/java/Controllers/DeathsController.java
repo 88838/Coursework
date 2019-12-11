@@ -12,7 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 @Path ("deaths/")
-public class deathsController {
+public class DeathsController {
 
     @GET
     @Path("list")
@@ -52,7 +52,7 @@ public class deathsController {
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
 
-            int playerID = playersController.identifyPlayer(token);
+            int playerID = PlayersController.identifyPlayer(token);
             int livesLeft= Integer.parseInt(livesLeftTemp);
             int deathLocationX = Integer.parseInt(deathLocationXTemp);
             int deathLocationY = Integer.parseInt(deathLocationYTemp);
