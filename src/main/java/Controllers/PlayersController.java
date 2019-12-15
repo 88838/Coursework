@@ -17,20 +17,20 @@ import java.util.UUID;
 @Path ("players/")
 public class PlayersController {
 
-    //this method is used to get the PlayerID using the token of the login session and will be used several times
+    //this method is used to get the playerid using the token of the login session and will be used several times
     public static int identifyPlayer(String token) {
-        int playerID = 0;
+        int playerid = 0;
         try {
-            PreparedStatement psGetPlayerID = Main.db.prepareStatement("SELECT PlayerID FROM Players WHERE Token = ?");
-            psGetPlayerID.setString(1, token);
-            ResultSet playerIDResults = psGetPlayerID.executeQuery();
-            while (playerIDResults.next()) {
-                playerID = playerIDResults.getInt(1);
+            PreparedStatement psGetPlayerid = Main.db.prepareStatement("SELECT playerid FROM Players WHERE token = ?");
+            psGetPlayerid.setString(1, token);
+            ResultSet playeridResults = psGetPlayerid.executeQuery();
+            while (playeridResults.next()) {
+                playerid = playeridResults.getInt(1);
             }
         } catch (Exception exception) {
             System.out.println("Database error:" + exception.getMessage());
         }
-        return playerID;
+        return playerid;
     }
 
     //the checkPassword function is needed to check that the password follows the constraints set out in phase 1 design
@@ -77,7 +77,7 @@ public class PlayersController {
         JSONArray list = new JSONArray();
         try {
             //the JSON array can be split in Javascript for those different uses, rather than having different APIs for each attribute.
-            PreparedStatement psKillInfo = Main.db.prepareStatement("SELECT Players.PlayerID, Kills.NumberOfKills, Kills.MonsterID FROM Players, Kills WHERE Players.PlayerID = Kills.PlayerID");
+            PreparedStatement psKillInfo = Main.db.prepareStatement("SELECT Players.playerid, Kills.numberOfKills, Kills.monsterid FROM Players, Kills WHERE Players.playerid = Kills.playerid");
 
             //these are the results from the killInfo prepared statement
             ResultSet killInfoResults = psKillInfo.executeQuery();
@@ -85,33 +85,33 @@ public class PlayersController {
             //this Hash Map is an example of an associative array
             HashMap<Integer, ArrayList<JSONObject>> playerKills = new HashMap<>();
             while (killInfoResults.next()) {
-                int playerID = killInfoResults.getInt(1);
-                //pushes playerID if it has not yet been mapped in the map
-                if (!playerKills.containsKey(playerID)) {
-                    playerKills.put(playerID, new ArrayList<JSONObject>());
+                int playerid = killInfoResults.getInt(1);
+                //pushes playerid if it has not yet been mapped in the map
+                if (!playerKills.containsKey(playerid)) {
+                    playerKills.put(playerid, new ArrayList<JSONObject>());
                 }
                 JSONObject killDetails = new JSONObject();
-                killDetails.put("MonsterID", killInfoResults.getInt(3));
-                killDetails.put("NumberOfKills", killInfoResults.getInt(2));
-                //the killDetails JSONObject is added to the element with the playerID index
-                playerKills.get(playerID).add(killDetails);
+                killDetails.put("monsterid", killInfoResults.getInt(3));
+                killDetails.put("numberOfKills", killInfoResults.getInt(2));
+                //the killDetails JSONObject is added to the element with the playerid index
+                playerKills.get(playerid).add(killDetails);
             }
 
-            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT PlayerID, Username, HighScore, Currency, SkinID FROM Players");
+            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT playerid, username, highScore, currency, skinid FROM Players");
 
             //there are the results from the PlayerInfo prepared statements
             ResultSet playerInfoResults = psPlayerInfo.executeQuery();
 
             while (playerInfoResults.next()) {
                 JSONObject item = new JSONObject();
-                int playerID = playerInfoResults.getInt(1);
-                item.put("PlayerID", playerID);
-                item.put("Username", playerInfoResults.getString(2));
-                item.put("HighScore", playerInfoResults.getString(3));
-                item.put("Currency", playerInfoResults.getString(4));
-                item.put("SkinID", playerInfoResults.getString(5));
-                //this adds all the kill details with the playerID from the hash map into the JSON object
-                item.put("Kills", playerKills.get(playerID));
+                int playerid = playerInfoResults.getInt(1);
+                item.put("playerid", playerid);
+                item.put("username", playerInfoResults.getString(2));
+                item.put("highScore", playerInfoResults.getString(3));
+                item.put("currency", playerInfoResults.getString(4));
+                item.put("skinid", playerInfoResults.getString(5));
+                //this adds all the kill details with the playerid from the hash map into the JSON object
+                item.put("kills", playerKills.get(playerid));
                 //the item is then added to the list
                 list.add(item);
             }
@@ -131,14 +131,14 @@ public class PlayersController {
     //this method was previously 'createPlayer' however I have now renamed it to be the same format as the API path
     public String playersNew(
             //these are the parameters that will be filled using Git Bash when testing
-            @FormDataParam("Username") String username, @FormDataParam("Password") String password) {
+            @FormDataParam("username") String username, @FormDataParam("password") String password) {
         System.out.println("players/new");
         try {
             //the API needs to check whether the player has put a username and password, otherwise a player can't be created
             if(username == null || password == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            PreparedStatement psNewPlayer = Main.db.prepareStatement("INSERT INTO Players (Username, Password) VALUES (?,?)");
+            PreparedStatement psNewPlayer = Main.db.prepareStatement("INSERT INTO Players (username, password) VALUES (?,?)");
 
             checkPassword(password);
 
@@ -161,17 +161,17 @@ public class PlayersController {
     //this method was previously 'updateUsername' however I have now renamed it to be the same format as the API path
     //the cookie parameter is similar to the form data parameter however will be used specifically for tokens
     public String playersChangeUsername(
-            @CookieParam("Token") String token, @FormDataParam("NewUsername") String newUsername) {
+            @CookieParam("token") String token, @FormDataParam("newUsername") String newUsername) {
         System.out.println("players/changeUsername");
         try {
             if(token == null || newUsername == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            int playerID = PlayersController.identifyPlayer(token);
+            int playerid = PlayersController.identifyPlayer(token);
 
             //this SQL statement gets the username of the player that was just identified
-            PreparedStatement psGetOldUsername = Main.db.prepareStatement("SELECT Username FROM Players WHERE PlayerID = ?");
-            psGetOldUsername.setInt(1, playerID);
+            PreparedStatement psGetOldUsername = Main.db.prepareStatement("SELECT username FROM Players WHERE playerid = ?");
+            psGetOldUsername.setInt(1, playerid);
             ResultSet oldUsernameResults = psGetOldUsername.executeQuery();
             String oldUsername = "";
             while (oldUsernameResults.next()) {
@@ -183,9 +183,9 @@ public class PlayersController {
                 return "{\"error\": \"Unable to change username. New username can't be the same as old username.\"}";
             }
 
-            PreparedStatement psChangeUsername = Main.db.prepareStatement("UPDATE Players SET Username = ? WHERE PlayerID = ?");
+            PreparedStatement psChangeUsername = Main.db.prepareStatement("UPDATE Players SET username = ? WHERE playerid = ?");
             psChangeUsername.setString(1, newUsername);
-            psChangeUsername.setInt(2, playerID);
+            psChangeUsername.setInt(2, playerid);
             psChangeUsername.executeUpdate();
 
             return "{\"status\": \"OK\"}";
@@ -201,16 +201,16 @@ public class PlayersController {
     @Produces(MediaType.APPLICATION_JSON)
     //this method was previously 'updatePassword' however I have now renamed it to be the same format as the API path
     public String playersChangePassword(
-            @CookieParam("Token") String token, @FormDataParam("NewPassword") String newPassword) {
+            @CookieParam("token") String token, @FormDataParam("newPassword") String newPassword) {
         System.out.println("players/changePassword");
         try {
             if(token == null || newPassword == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            int playerID = PlayersController.identifyPlayer(token);
+            int playerid = PlayersController.identifyPlayer(token);
 
-            PreparedStatement psGetOldPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
-            psGetOldPassword.setInt(1, playerID);
+            PreparedStatement psGetOldPassword = Main.db.prepareStatement("SELECT password FROM Players WHERE playerid = ?");
+            psGetOldPassword.setInt(1, playerid);
             ResultSet oldPasswordResults = psGetOldPassword.executeQuery();
 
             String oldPassword = "";
@@ -223,12 +223,12 @@ public class PlayersController {
                 return "{\"error\": \"Unable to change password. New password can't be the same as old password.\"}";
             }
 
-            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET Password = ? WHERE PlayerID = ?");
+            PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET password = ? WHERE playerid = ?");
 
             checkPassword(newPassword);
 
             ps.setString(1, newPassword);
-            ps.setInt(2, playerID);
+            ps.setInt(2, playerid);
             ps.executeUpdate();
 
             return "{\"status\": \"OK\"}";
@@ -245,23 +245,23 @@ public class PlayersController {
     @Produces(MediaType.APPLICATION_JSON)
     //this method was previously 'updateSkin' however I have now renamed it to be the same format as the API path
     public String playersChangeSkin(
-            @CookieParam("Token") String token, @FormDataParam("SkinID") String skinIDTemp) {
+            @CookieParam("token") String token, @FormDataParam("skinid") String skinidTemp) {
         System.out.println("players/changeSkin");
         try {
-            if(token == null || skinIDTemp == null){
+            if(token == null || skinidTemp == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
 
             //the only way to check if the parameter is in the HTTP request is to have it as a string because it is a non-primitive data type
-            //for the purposes of the rest of the API method, skinID has to be an integer
-            int skinID = Integer.parseInt(skinIDTemp);
-            int playerID = PlayersController.identifyPlayer(token);
+            //for the purposes of the rest of the API method, skinid has to be an integer
+            int skinid = Integer.parseInt(skinidTemp);
+            int playerid = PlayersController.identifyPlayer(token);
 
             //this sql statement checks whether a player with the PlayerID owns a skin with the SkinID
-            PreparedStatement psCheckUnlockedSkin = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM UnlockedSkins WHERE PlayerID = ? and SkinID = ?)");
+            PreparedStatement psCheckUnlockedSkin = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM UnlockedSkins WHERE playerid = ? and skinid = ?)");
 
-            psCheckUnlockedSkin.setInt(1, playerID);
-            psCheckUnlockedSkin.setInt(2, skinID);
+            psCheckUnlockedSkin.setInt(1, playerid);
+            psCheckUnlockedSkin.setInt(2, skinid);
             ResultSet unlockedSkinResults = psCheckUnlockedSkin.executeQuery();
 
             int exists = 0;
@@ -272,15 +272,15 @@ public class PlayersController {
             //if the player doesn't own the skin then an error is returned
             if(exists==0){
                 //the skin with SkinID 1 is automatically unlocked because it is the default, so it doesn't need to be in the UnlockedSkins table
-                if(skinID != 1) {
+                if(skinid != 1) {
                     return "{\"error\": \"Unable to change skin. Player has not unlocked this skin.\"}";
                 }
             }
 
-            PreparedStatement psChangeSkin = Main.db.prepareStatement("UPDATE Players SET SkinID = ? WHERE PlayerID = ?");
+            PreparedStatement psChangeSkin = Main.db.prepareStatement("UPDATE Players SET skinid = ? WHERE playerid = ?");
 
-            psChangeSkin.setInt(1, skinID);
-            psChangeSkin.setInt(2, playerID);
+            psChangeSkin.setInt(1, skinid);
+            psChangeSkin.setInt(2, playerid);
             psChangeSkin.executeUpdate();
 
             return "{\"status\": \"OK\"}";
@@ -295,7 +295,7 @@ public class PlayersController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String playersUpdateHighScore(
-            @CookieParam("Token") String token, @FormDataParam("NewHighScore") String newHighScoreTemp) {
+            @CookieParam("token") String token, @FormDataParam("newHighScore") String newHighScoreTemp) {
         System.out.println("players/updateHighScore");
         try {
             if(token == null || newHighScoreTemp == null){
@@ -303,12 +303,12 @@ public class PlayersController {
             }
 
             int newHighScore = Integer.parseInt(newHighScoreTemp);
-            int playerID = PlayersController.identifyPlayer(token);
+            int playerid = PlayersController.identifyPlayer(token);
 
-            PreparedStatement psUpdateHighScore = Main.db.prepareStatement("UPDATE Players SET HighScore = ? WHERE PlayerID = ?");
+            PreparedStatement psUpdateHighScore = Main.db.prepareStatement("UPDATE Players SET highScore = ? WHERE playerid = ?");
 
             psUpdateHighScore.setInt(1, newHighScore);
-            psUpdateHighScore.setInt(2, playerID);
+            psUpdateHighScore.setInt(2, playerid);
             psUpdateHighScore.executeUpdate();
 
             return "{\"status\": \"OK\"}";
@@ -323,7 +323,7 @@ public class PlayersController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String playersUpdateCurrency(
-            @CookieParam("Token") String token, @FormDataParam("SessionCurrency") String sessionCurrencyTemp) {
+            @CookieParam("token") String token, @FormDataParam("sessionCurrency") String sessionCurrencyTemp) {
         System.out.println("players/updateCurrency");
         try {
             if(token == null || sessionCurrencyTemp == null){
@@ -331,11 +331,11 @@ public class PlayersController {
             }
 
             int sessionCurrency = Integer.parseInt(sessionCurrencyTemp);
-            int playerID = PlayersController.identifyPlayer(token);
+            int playerid = PlayersController.identifyPlayer(token);
 
-            PreparedStatement psGetOldCurrency = Main.db.prepareStatement("SELECT Currency FROM Players WHERE PlayerID = ?");
+            PreparedStatement psGetOldCurrency = Main.db.prepareStatement("SELECT currency FROM Players WHERE playerid = ?");
 
-            psGetOldCurrency.setInt(1, playerID);
+            psGetOldCurrency.setInt(1, playerid);
             ResultSet oldCurrencyResults = psGetOldCurrency.executeQuery();
 
             int oldCurrency = 0;
@@ -346,10 +346,10 @@ public class PlayersController {
             //the old currency of the player and the currency that they just got in their last life are added together to form a new currency
             int newCurrency = oldCurrency + sessionCurrency;
 
-            PreparedStatement psUpdateCurrency = Main.db.prepareStatement("UPDATE Players SET Currency = ? WHERE PlayerID = ?");
+            PreparedStatement psUpdateCurrency = Main.db.prepareStatement("UPDATE Players SET currency = ? WHERE playerid = ?");
 
             psUpdateCurrency.setInt(1, newCurrency);
-            psUpdateCurrency.setInt(2, playerID);
+            psUpdateCurrency.setInt(2, playerid);
             psUpdateCurrency.executeUpdate();
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
@@ -363,17 +363,17 @@ public class PlayersController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String playersDelete(
-            @CookieParam("Token") String token, @FormDataParam("Password") String password) {
+            @CookieParam("token") String token, @FormDataParam("password") String password) {
         System.out.println("players/delete");
         try {
             if(token == null || password == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            int playerID = PlayersController.identifyPlayer(token);
+            int playerid = PlayersController.identifyPlayer(token);
 
-            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
+            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT password FROM Players WHERE playerid = ?");
 
-            psGetPassword.setInt(1, playerID);
+            psGetPassword.setInt(1, playerid);
             ResultSet passwordResults = psGetPassword.executeQuery();
 
             String correctPassword = "";
@@ -390,20 +390,20 @@ public class PlayersController {
                 Main.db.setAutoCommit(false);
 
                 //all the prepared statements are done in the same order as when it was a transaction
-                PreparedStatement psDeleteFromUnlockedSkins = Main.db.prepareStatement("DELETE FROM UnlockedSkins WHERE PlayerID = ?");
-                psDeleteFromUnlockedSkins.setInt(1, playerID);
+                PreparedStatement psDeleteFromUnlockedSkins = Main.db.prepareStatement("DELETE FROM UnlockedSkins WHERE playerid = ?");
+                psDeleteFromUnlockedSkins.setInt(1, playerid);
                 psDeleteFromUnlockedSkins.executeUpdate();
 
-                PreparedStatement psDeleteFromKills = Main.db.prepareStatement("DELETE FROM Kills WHERE PlayerID = ?");
-                psDeleteFromKills.setInt(1, playerID);
+                PreparedStatement psDeleteFromKills = Main.db.prepareStatement("DELETE FROM Kills WHERE playerid = ?");
+                psDeleteFromKills.setInt(1, playerid);
                 psDeleteFromKills.executeUpdate();
 
-                PreparedStatement psDeleteFromDeaths = Main.db.prepareStatement("DELETE FROM Deaths WHERE PlayerID = ?");
-                psDeleteFromDeaths.setInt(1, playerID);
+                PreparedStatement psDeleteFromDeaths = Main.db.prepareStatement("DELETE FROM Deaths WHERE playerid = ?");
+                psDeleteFromDeaths.setInt(1, playerid);
                 psDeleteFromDeaths.executeUpdate();
 
-                PreparedStatement psDeleteFromPlayers = Main.db.prepareStatement("DELETE FROM Players WHERE PlayerID = ?");
-                psDeleteFromPlayers.setInt(1, playerID);
+                PreparedStatement psDeleteFromPlayers = Main.db.prepareStatement("DELETE FROM Players WHERE playerid = ?");
+                psDeleteFromPlayers.setInt(1, playerid);
                 psDeleteFromPlayers.executeUpdate();
 
                 //end of transaction
@@ -427,7 +427,7 @@ public class PlayersController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String playersLogin(
-            @FormDataParam("Username") String username, @FormDataParam("Password") String password) {
+            @FormDataParam("username") String username, @FormDataParam("password") String password) {
         System.out.println("players/login");
         try {
             if(username == null || password == null){
@@ -435,7 +435,7 @@ public class PlayersController {
             }
 
             //this sql statement checks whether the player with that username exists
-            PreparedStatement psCheckUsername = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE Username = ?)");
+            PreparedStatement psCheckUsername = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE username = ?)");
             psCheckUsername.setString(1, username);
 
             //similar code to the players/updateSkin API
@@ -453,19 +453,19 @@ public class PlayersController {
             }
 
             //this sql statement is similar to the one in the identifyPlayer() method, however this time it's identifying the player based on their username instead of their token
-            PreparedStatement psGetPlayerID = Main.db.prepareStatement("SELECT PlayerID FROM Players WHERE Username = ?");
-            psGetPlayerID.setString(1, username);
+            PreparedStatement psGetPlayerid = Main.db.prepareStatement("SELECT playerid FROM Players WHERE username = ?");
+            psGetPlayerid.setString(1, username);
 
-            int playerID = 0;
-            ResultSet playerIDResults = psGetPlayerID.executeQuery();
-            while (playerIDResults.next()) {
-                playerID = playerIDResults.getInt(1);
+            int playerid = 0;
+            ResultSet playeridResults = psGetPlayerid.executeQuery();
+            while (playeridResults.next()) {
+                playerid = playeridResults.getInt(1);
             }
 
             //similar code the players/delete API
-            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT Password FROM Players WHERE PlayerID = ?");
+            PreparedStatement psGetPassword = Main.db.prepareStatement("SELECT password FROM Players WHERE playerid = ?");
 
-            psGetPassword.setInt(1, playerID);
+            psGetPassword.setInt(1, playerid);
             ResultSet passwordResults = psGetPassword.executeQuery();
 
             String correctPassword = "";
@@ -480,12 +480,12 @@ public class PlayersController {
             //this generates a random Universally Unique Identifier
             String token  = UUID.randomUUID().toString();
 
-            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET Token = ? WHERE PlayerID = ?");
+            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET token = ? WHERE playerid = ?");
             psUpdateToken.setString(1, token);
-            psUpdateToken.setInt(2, playerID);
+            psUpdateToken.setInt(2, playerid);
             psUpdateToken.executeUpdate();
 
-            return "{\"Token\": \"" + token + "\"}";
+            return "{\"token\": \"" + token + "\"}";
         } catch (Exception exception) {
             System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to login. Please see server console for more info.\"}";
@@ -504,7 +504,7 @@ public class PlayersController {
                 return "{\"error\": \"Player is not logged in.\"}";
             }
 
-            PreparedStatement psCheckToken = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE Token = ?)");
+            PreparedStatement psCheckToken = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE token = ?)");
             psCheckToken.setString(1, token);
 
             ResultSet tokenResults = psCheckToken.executeQuery();
@@ -531,13 +531,13 @@ public class PlayersController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String playersLogout(
-            @CookieParam("Token") String token) {
+            @CookieParam("token") String token) {
         System.out.println("players/logout");
         try {
             if(token == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
-            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET Token = NULL WHERE Token = ?");
+            PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET token = NULL WHERE token = ?");
             psUpdateToken.setString(1, token);
             psUpdateToken.executeUpdate();
 

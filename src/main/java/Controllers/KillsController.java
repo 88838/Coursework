@@ -17,42 +17,42 @@ public class KillsController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String killsUpdate(
-            @CookieParam("Token") String token, @FormDataParam("MonsterID") String monsterIDTemp, @FormDataParam("SessionKills") String sessionKillsTemp) {
+            @CookieParam("token") String token, @FormDataParam("monsterid") String monsteridTemp, @FormDataParam("sessionKills") String sessionKillsTemp) {
         System.out.println("kills/update");
         try {
-            if(token == null || monsterIDTemp == null || sessionKillsTemp == null){
+            if(token == null || monsteridTemp == null || sessionKillsTemp == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
 
-            int playerID = PlayersController.identifyPlayer(token);
-            int monsterID = Integer.parseInt(monsterIDTemp);
+            int playerid = PlayersController.identifyPlayer(token);
+            int monsterid = Integer.parseInt(monsteridTemp);
             int sessionKills = Integer.parseInt(sessionKillsTemp);
 
             //this SQL statement checks whether the player has killed that monster
-            PreparedStatement psCheckMonsterID = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Kills WHERE PlayerID = ? AND MonsterID = ?)");
-            psCheckMonsterID.setInt(1, playerID);
-            psCheckMonsterID.setInt(2, monsterID);
-            ResultSet monsterIDResults = psCheckMonsterID.executeQuery();
+            PreparedStatement psCheckMonsterid = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Kills WHERE playerid = ? AND monsterid = ?)");
+            psCheckMonsterid.setInt(1, playerid);
+            psCheckMonsterid.setInt(2, monsterid);
+            ResultSet monsteridResults = psCheckMonsterid.executeQuery();
 
             int exists = 0;
-            while (monsterIDResults.next()) {
-                exists = monsterIDResults.getInt(1);
+            while (monsteridResults.next()) {
+                exists = monsteridResults.getInt(1);
             }
 
             //if the player hasn't killed the monster, then a new kill is created, using the MonsterID from the form data parameters
             if(exists==0){
                 //this is the first instance of the kill, so the session kill don't need to be added to anything and can be used as the number of kills
-                PreparedStatement psNewKill = Main.db.prepareStatement("INSERT INTO Kills (PlayerID, MonsterID, NumberOfKills) VALUES (?,?,?)");
-                psNewKill.setInt(1, playerID);
-                psNewKill.setInt(2, monsterID);
+                PreparedStatement psNewKill = Main.db.prepareStatement("INSERT INTO Kills (playerid, mosterid, numberOfKills) VALUES (?,?,?)");
+                psNewKill.setInt(1, playerid);
+                psNewKill.setInt(2, monsterid);
                 psNewKill.setInt(3, sessionKills);
                 psNewKill.executeUpdate();
                 return "{\"status\": \"OK\"}";
             }
 
-            PreparedStatement psGetOldNumberOfKills = Main.db.prepareStatement("SELECT NumberOfKills FROM Kills WHERE PlayerID = ? AND MonsterID = ?");
-            psGetOldNumberOfKills.setInt(1, playerID);
-            psGetOldNumberOfKills.setInt(2, monsterID);
+            PreparedStatement psGetOldNumberOfKills = Main.db.prepareStatement("SELECT numberOfKills FROM Kills WHERE playerid = ? AND monsterid = ?");
+            psGetOldNumberOfKills.setInt(1, playerid);
+            psGetOldNumberOfKills.setInt(2, monsterid);
             ResultSet oldNumberOfKillsResults = psGetOldNumberOfKills.executeQuery();
 
             int oldNumberOfKills = 0;
@@ -63,11 +63,11 @@ public class KillsController {
             //the old number of kills is added to the kills the player got in their last life to form a new total
             int newNumberOfKills = oldNumberOfKills + sessionKills;
 
-            PreparedStatement psUpdateKill = Main.db.prepareStatement("UPDATE Kills SET NumberOfKills = ? WHERE PlayerID = ? AND MonsterID = ?");
+            PreparedStatement psUpdateKill = Main.db.prepareStatement("UPDATE Kills SET numberOfKills = ? WHERE playerid = ? AND monsterid = ?");
 
             psUpdateKill.setInt(1, newNumberOfKills);
-            psUpdateKill.setInt(2, playerID);
-            psUpdateKill.setInt(3, monsterID);
+            psUpdateKill.setInt(2, playerid);
+            psUpdateKill.setInt(3, monsterid);
             psUpdateKill.executeUpdate();
 
             return "{\"status\": \"OK\"}";

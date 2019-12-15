@@ -1,15 +1,22 @@
-function checkToken(success, fail) {
 
+function checkToken(success, fail) {
+    /*the token is grabbed from the browser*/
     const token = Cookies.get("token");
+    /*if the token is undefined, fail() runs*/
     if (token === undefined) fail();
 
+/*    const formData = new FormData();
+    formData.append("token", token);
+
+    fetch("/players/checkToken", {method: 'post', data: formData}*/
+    /*the token doesn't need to be passed as a parameter because the web browser sends cookies automatically*/
     fetch("/players/checkToken", {method: 'get'}
     ).then(response => response.json()
-    ).then(data => {
-        if (data.hasOwnProperty("error")) {
+    ).then(responseData => {
+        if (responseData.hasOwnProperty("error")) {
             fail();
         } else {
-            data.status === "OK" ? success() : fail();
+            responseData.status === "OK" ? success() : fail();
         }
     });
 }

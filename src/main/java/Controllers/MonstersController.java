@@ -20,17 +20,17 @@ public class MonstersController {
         System.out.println("monsters/list");
         JSONArray list = new JSONArray();
         try{
-            PreparedStatement psGetMonsters = Main.db.prepareStatement("SELECT MonsterID, MonsterName, MovementType, AttackType, ImageFile, StageID  FROM Monsters");
+            PreparedStatement psGetMonsters = Main.db.prepareStatement("SELECT monsterid, monsterName, movementType, attackType, imageFile, stageid  FROM Monsters");
 
             ResultSet monstersResults = psGetMonsters.executeQuery();
             while (monstersResults.next()) {
                 JSONObject item = new JSONObject();
-                item.put("MonsterID", monstersResults.getInt(1));
-                item.put("MonsterName", monstersResults.getString(2));
-                item.put("MovementType", monstersResults.getString(3));
-                item.put("AttackType", monstersResults.getString(4));
-                item.put("ImageFile", monstersResults.getString(5));
-                item.put("StageID", monstersResults.getInt(6));
+                item.put("monsterid", monstersResults.getInt(1));
+                item.put("monsterName", monstersResults.getString(2));
+                item.put("movementType", monstersResults.getString(3));
+                item.put("attackType", monstersResults.getString(4));
+                item.put("imageFile", monstersResults.getString(5));
+                item.put("stageid", monstersResults.getInt(6));
                 list.add(item);
             }
             return list.toString();

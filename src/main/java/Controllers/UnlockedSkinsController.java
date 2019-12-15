@@ -21,12 +21,12 @@ public class UnlockedSkinsController {
         System.out.println("unlockedSkins/list");
         JSONArray list = new JSONArray();
         try{
-            PreparedStatement psGetUnlockedSkins = Main.db.prepareStatement("SELECT PlayerID, SkinID  FROM UnlockedSkins");
+            PreparedStatement psGetUnlockedSkins = Main.db.prepareStatement("SELECT playerid, skinid  FROM UnlockedSkins");
             ResultSet unlockedSkinsResults = psGetUnlockedSkins.executeQuery();
             while (unlockedSkinsResults.next()) {
                 JSONObject item = new JSONObject();
-                item.put("PlayerID", unlockedSkinsResults.getInt(1));
-                item.put("SkinID", unlockedSkinsResults.getInt(2));
+                item.put("playerid", unlockedSkinsResults.getInt(1));
+                item.put("skinid", unlockedSkinsResults.getInt(2));
                 list.add(item);
             }
             return list.toString();
@@ -41,37 +41,37 @@ public class UnlockedSkinsController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String unlockedSkinsNew(
-            @CookieParam("Token") String token, @FormDataParam("SkinID") String skinIDTemp) {
+            @CookieParam("token") String token, @FormDataParam("skinid") String skinidTemp) {
         System.out.println("unlockedSkins/new");
         try {
-            if(token == null || skinIDTemp == null){
+            if(token == null || skinidTemp == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
 
-            int skinID = Integer.parseInt(skinIDTemp);
-            int playerID = PlayersController.identifyPlayer(token);
+            int skinid = Integer.parseInt(skinidTemp);
+            int playerid = PlayersController.identifyPlayer(token);
 
-            PreparedStatement psGetSkinID = Main.db.prepareStatement("SELECT SkinID FROM UnlockedSkins WHERE PlayerID = ?");
-            psGetSkinID.setInt(1, playerID);
-            ResultSet skinIDResults = psGetSkinID.executeQuery();
-            while (skinIDResults.next()) {
+            PreparedStatement psGetSkinid = Main.db.prepareStatement("SELECT skinid FROM UnlockedSkins WHERE playerid = ?");
+            psGetSkinid.setInt(1, playerid);
+            ResultSet skinidResults = psGetSkinid.executeQuery();
+            while (skinidResults.next()) {
                 //if the player has already unlocked that skin, then an error should be returned
-                int unlockedSkinID = skinIDResults.getInt(1);
-                if (unlockedSkinID == skinID) {
+                int unlockedSkinid = skinidResults.getInt(1);
+                if (unlockedSkinid == skinid) {
                     return "{\"error\": \"Unable to buy skin. Player has already unlocked this skin.\"}";
                 }
             }
 
-            PreparedStatement psGetSkinCost = Main.db.prepareStatement("SELECT Cost FROM Skins WHERE SkinID = ?");
-            psGetSkinCost.setInt(1, skinID);
+            PreparedStatement psGetSkinCost = Main.db.prepareStatement("SELECT cost FROM Skins WHERE skinid = ?");
+            psGetSkinCost.setInt(1, skinid);
             ResultSet skinCostResults = psGetSkinCost.executeQuery();
             int cost = 0;
             while (skinCostResults.next()) {
                 cost = skinCostResults.getInt(1);
             }
 
-            PreparedStatement psGetPlayerCurrency = Main.db.prepareStatement("SELECT Currency FROM Players WHERE PlayerID = ?");
-            psGetPlayerCurrency.setInt(1, playerID);
+            PreparedStatement psGetPlayerCurrency = Main.db.prepareStatement("SELECT currency FROM Players WHERE playerid = ?");
+            psGetPlayerCurrency.setInt(1, playerid);
             ResultSet currencyResults = psGetPlayerCurrency.executeQuery();
             int currency = 0;
             while (currencyResults.next()) {
@@ -88,14 +88,14 @@ public class UnlockedSkinsController {
             try{
                 Main.db.setAutoCommit(false);
 
-                PreparedStatement psNewUnlockedSkin = Main.db.prepareStatement("INSERT INTO UnlockedSkins (PlayerID, SkinID) Values (?,?)");
-                psNewUnlockedSkin.setInt(1, playerID);
-                psNewUnlockedSkin.setInt(2, skinID);
+                PreparedStatement psNewUnlockedSkin = Main.db.prepareStatement("INSERT INTO UnlockedSkins (playerid, skinid) Values (?,?)");
+                psNewUnlockedSkin.setInt(1, playerid);
+                psNewUnlockedSkin.setInt(2, skinid);
                 psNewUnlockedSkin.executeUpdate();
 
-                PreparedStatement psUpdateCurrency = Main.db.prepareStatement("UPDATE Players SET Currency = ? WHERE PlayerID = ?");
+                PreparedStatement psUpdateCurrency = Main.db.prepareStatement("UPDATE Players SET currency = ? WHERE playerid = ?");
                 psUpdateCurrency.setInt(1, currency);
-                psUpdateCurrency.setInt(2, playerID);
+                psUpdateCurrency.setInt(2, playerid);
                 psUpdateCurrency.executeUpdate();
 
                 Main.db.commit();

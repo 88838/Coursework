@@ -24,33 +24,34 @@ let loadMonsterImages = new Promise(function(resolve) {
 });
 
 class Monster{
-    constructor(id, x){
+    constructor(id, startX, spawnDelay){
         this.type = id;
-        this.startX = x;
+        this.startX = startX;
 
         this.image = monsterImages[id];
 
-/*        this.x = 0;*/
+        this.x = 0;
         this.y = ph;
         this.dx = 0;
-        this.dy = -100;
+        this.dy = -300;
 
         this.alive = true;
-        this.spawnTimer=0;
+
+        this.spawnDelay = spawnDelay;
 
     }
     draw(context){
         if (!this.alive) return;
-        context.drawImage(this.image, this.startX - this.image.width/2, this.y - this.image.height/2);
+        context.drawImage(this.image, this.startX - this.image.width/2, this.y + this.image.height);
     }
 
     update(frameLength) {
 
         if (!this.alive) return;
 
-        if (this.spawnTimer > 0) {
+        if (this.spawnDelay > 0) {
 
-            this.spawnTimer -= frameLength;
+            this.spawnDelay -= frameLength;
 
         }else {
             this.x += frameLength * this.dx;

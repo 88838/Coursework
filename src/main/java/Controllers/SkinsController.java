@@ -20,14 +20,14 @@ public class SkinsController {
         System.out.println("skins/list");
         JSONArray list = new JSONArray();
         try{
-            PreparedStatement psGetSkins = Main.db.prepareStatement("SELECT SkinID, SkinName, ImageFile, Cost  FROM Skins");
+            PreparedStatement psGetSkins = Main.db.prepareStatement("SELECT skinid, skinName, imageFile, cost  FROM Skins");
             ResultSet skinsResults = psGetSkins.executeQuery();
             while (skinsResults.next()) {
                 JSONObject item = new JSONObject();
-                item.put("SkinID", skinsResults.getInt(1));
-                item.put("SkinName", skinsResults.getString(2));
-                item.put("ImageFile", skinsResults.getString(3));
-                item.put("Cost", skinsResults.getInt(4));
+                item.put("skinid", skinsResults.getInt(1));
+                item.put("skinName", skinsResults.getString(2));
+                item.put("imageFile", skinsResults.getString(3));
+                item.put("cost", skinsResults.getInt(4));
                 list.add(item);
             }
             return list.toString();

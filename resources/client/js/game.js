@@ -13,11 +13,30 @@ function pageLoad(){
 
     window.addEventListener("keydown", event => pressedKeys[event.key] = true);
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
+    loadPlayerImage.then(() => {
+        loadMonsterImages.then(() => {
+            player = new Player(pw/2, ph/2);
 
-    player = new Player(pw/2, ph/2);
-    monsters.push(new Monster(1,pw/2));
+            prepareMonsters();
 
-    window.requestAnimationFrame(gameFrame);
+            window.requestAnimationFrame(gameFrame);
+        });
+    });
+
+}
+
+
+
+function prepareMonsters() {
+
+    for (let i = 0; i < 20; i++) {
+
+        let randomStartX = Math.floor(Math.random() * (pw - 64)) + 32;
+        let randomSpawnDelay = Math.random() * 15;
+        monsters.push(new Monster(1, randomStartX, randomSpawnDelay));
+
+    }
+
 }
 
 let frame = 0;
@@ -25,9 +44,12 @@ function gameFrame(timestamp) {
 
     console.log(frame++);
 
+
     if (lastTimestamp === 0) lastTimestamp = timestamp;
     const frameLength = (timestamp - lastTimestamp) / 1000;
     lastTimestamp = timestamp;
+
+    console.log(frameLength);
     inputs(frameLength);
     processes(frameLength);
     outputs();
@@ -35,10 +57,14 @@ function gameFrame(timestamp) {
     window.requestAnimationFrame(gameFrame);
 }
 function processes(frameLength){
+
     for( let monster of monsters){
         monster.update(frameLength);
     }
+    monsters = monsters.filter(m => m.alive);
+
     player.update(frameLength);
+
 }
 function inputs(frameLength){
     if (player.alive){

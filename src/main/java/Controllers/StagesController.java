@@ -20,13 +20,13 @@ public class StagesController {
         System.out.println("stages/list");
         JSONArray list = new JSONArray();
         try{
-            PreparedStatement psGetStages = Main.db.prepareStatement("SELECT StageID, LocationY, ImageFile  FROM Stages");
+            PreparedStatement psGetStages = Main.db.prepareStatement("SELECT stageid, locationY, imageFile  FROM Stages");
             ResultSet stagesResults = psGetStages.executeQuery();
             while (stagesResults.next()) {
                 JSONObject item = new JSONObject();
-                item.put("StageID", stagesResults.getInt(1));
-                item.put("LocationY", stagesResults.getInt(2));
-                item.put("ImageFile", stagesResults.getString(3));
+                item.put("stageid", stagesResults.getInt(1));
+                item.put("locationY", stagesResults.getInt(2));
+                item.put("imageFile", stagesResults.getString(3));
                 list.add(item);
             }
             return list.toString();
