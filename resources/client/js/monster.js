@@ -1,4 +1,4 @@
-const monsterImageCount = 2;
+const monsterImageCount = 1;
 const monsterImages = [];
 
 let monsters = [];
@@ -24,13 +24,12 @@ let loadMonsterImages = new Promise(function(resolve) {
 });
 
 class Monster{
-    constructor(id, startX, spawnDelay){
+    constructor(id, x, spawnDelay){
         this.type = id;
-        this.startX = startX;
 
         this.image = monsterImages[id];
 
-        this.x = 0;
+        this.x = x;
         this.y = ph;
         this.dx = 0;
         this.dy = -300;
@@ -42,11 +41,10 @@ class Monster{
     }
     draw(context){
         if (!this.alive) return;
-        context.drawImage(this.image, this.startX - this.image.width/2, this.y + this.image.height);
+        context.drawImage(this.image, this.x - this.image.width/2, this.y + this.image.height);
     }
 
     update(frameLength) {
-
         if (!this.alive) return;
 
         if (this.spawnDelay > 0) {

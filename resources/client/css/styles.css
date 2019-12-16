@@ -43,6 +43,7 @@ body {
     /*the logo div is 9% from the top, which then also pushes the options down as well*/
     margin-top: 9%;
     text-align: center;
+    user-select: none;
 }
 #logoDiv img {
     width: 55%;

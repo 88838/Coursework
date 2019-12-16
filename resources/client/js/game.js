@@ -3,6 +3,18 @@ let lastTimestamp = 0;
 
 const pressedKeys = {};
 
+
+function separation(entity1, entity2) {
+
+    let distance = Math.sqrt(Math.pow(entity1.x - entity2.x, 2)
+        + Math.pow(entity1.y - entity2.y, 2));
+
+    console.log(entity1.x + ", " + entity1.y + " vs " + entity2.x + ", " + entity2.y + " = " + distance);
+
+    return distance;
+
+}
+
 function pageLoad(){
     document.getElementById("mainMenuOption").addEventListener("click", ()=> window.location.href = "/client/index.html");
 
@@ -13,9 +25,11 @@ function pageLoad(){
 
     window.addEventListener("keydown", event => pressedKeys[event.key] = true);
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
+
     loadPlayerImage.then(() => {
         loadMonsterImages.then(() => {
             player = new Player(pw/2, ph/2);
+            stage = new Stage(1);
 
             prepareMonsters();
 
@@ -39,17 +53,12 @@ function prepareMonsters() {
 
 }
 
-let frame = 0;
 function gameFrame(timestamp) {
-
-    console.log(frame++);
-
 
     if (lastTimestamp === 0) lastTimestamp = timestamp;
     const frameLength = (timestamp - lastTimestamp) / 1000;
     lastTimestamp = timestamp;
 
-    console.log(frameLength);
     inputs(frameLength);
     processes(frameLength);
     outputs();
@@ -60,20 +69,30 @@ function processes(frameLength){
 
     for( let monster of monsters){
         monster.update(frameLength);
-    }
-    monsters = monsters.filter(m => m.alive);
 
+        if( monster.y < -(monster.image.height*2)){
+            monster.alive = false;
+        }
+
+        if (separation(monster, player) < monster.image.height/2) {
+            player.lives -= 1;
+            console.log("ouch")
+            if (player.lives<=0) player.alive = false;
+        }
+        if (!player.alive) monster.alive = false;
+    }
+
+    monsters = monsters.filter(m => m.alive);
+    stage.update(frameLength);
     player.update(frameLength);
 
 }
 function inputs(frameLength){
     if (player.alive){
         if(pressedKeys["a"]){
-            console.log("a");
             player.dx -= 20000*frameLength;
             if (player.dx < -600) player.dx = -600;
         }else if(pressedKeys["d"]){
-            console.log("d");
             player.dx += 20000*frameLength;
             if (player.dx > 600) player.dx = 600;
         } else{
@@ -89,6 +108,8 @@ function outputs(){
     const pac = playableArea.getContext('2d');
     pac.fillStyle = 'blue';
     pac.fillRect(0,0, pw, ph);
+
+    stage.draw(pac);
 
 
     player.draw(pac);

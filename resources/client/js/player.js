@@ -22,8 +22,6 @@ class Player{
 
     }
     update(frameLength) {
-        //The player update function needs to update the
-        //position of the player but stop them leaving the screen.
         if (!player.alive) return;
 
         this.x += frameLength * this.dx;
