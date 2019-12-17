@@ -9,6 +9,9 @@ class Stage{
         this.y = 0;
         this.dy = 100;
     }
+    restart(){
+        this.y = 0;
+    }
     draw(context){
         if (!player.alive) return;
         context.drawImage(this.image, 0, this.y, 600, 600, 0, 0, 600, 600);

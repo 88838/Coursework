@@ -8,8 +8,8 @@ function separation(entity1, entity2) {
 
     let distance = Math.sqrt(Math.pow(entity1.x - entity2.x, 2)
         + Math.pow(entity1.y - entity2.y, 2));
-
-    console.log(entity1.x + ", " + entity1.y + " vs " + entity2.x + ", " + entity2.y + " = " + distance);
+/*
+    console.log(entity1.x + ", " + entity1.y + " vs " + entity2.x + ", " + entity2.y + " = " + distance);*/
 
     return distance;
 
@@ -40,15 +40,15 @@ function pageLoad(){
 }
 
 
-
-function prepareMonsters() {
+function randomSpawn(){
+    let randomStartX = Math.floor(Math.random() * (pw - 64)) + 32;
+    let randomSpawnDelay = Math.random() * 15;
+    return[randomStartX, randomSpawnDelay];
+}
+function prepareMonsters(mode) {
 
     for (let i = 0; i < 20; i++) {
-
-        let randomStartX = Math.floor(Math.random() * (pw - 64)) + 32;
-        let randomSpawnDelay = Math.random() * 15;
-        monsters.push(new Monster(1, randomStartX, randomSpawnDelay));
-
+        monsters.push(new Monster(1, randomSpawn()[0], randomSpawn()[1]));
     }
 
 }
@@ -65,8 +65,17 @@ function gameFrame(timestamp) {
 
     window.requestAnimationFrame(gameFrame);
 }
+/*let collision = false;
+let collisionTime;*/
+function resolveCollision(){
+    for (let monster of monsters) {
+        monster.restart(randomSpawn()[0], randomSpawn()[1]);
+    }
+    stage.restart();
+    player.lives -=1;
+}
 function processes(frameLength){
-
+    console.log(player.lives);
     for( let monster of monsters){
         monster.update(frameLength);
 
@@ -74,11 +83,11 @@ function processes(frameLength){
             monster.alive = false;
         }
 
-        if (separation(monster, player) < monster.image.height/2) {
-            player.lives -= 1;
-            console.log("ouch")
-            if (player.lives<=0) player.alive = false;
+        if (separation(monster, player) < monster.image.height-2) {
+            monster.alive = false;
+            resolveCollision();
         }
+
         if (!player.alive) monster.alive = false;
     }
 
