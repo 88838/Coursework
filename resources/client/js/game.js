@@ -6,22 +6,20 @@ const pressedKeys = {};
 
 function separation(entity1, entity2) {
 
-    let distance = Math.sqrt(Math.pow(entity1.x - entity2.x, 2)
+    return Math.sqrt(Math.pow(entity1.x - entity2.x, 2)
         + Math.pow(entity1.y - entity2.y, 2));
-/*
-    console.log(entity1.x + ", " + entity1.y + " vs " + entity2.x + ", " + entity2.y + " = " + distance);*/
-
-    return distance;
-
 }
 
+function randomX(){
+    return Math.floor(Math.random() * (pw - 64)) + 32;
+}
+let score = 0;
 function pageLoad(){
     document.getElementById("mainMenuOption").addEventListener("click", ()=> window.location.href = "/client/index.html");
 
     const canvas = document.getElementById('gameCanvas');
     gw = canvas.width;
     gh = canvas.height;
-
 
     window.addEventListener("keydown", event => pressedKeys[event.key] = true);
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
@@ -31,26 +29,13 @@ function pageLoad(){
             player = new Player(pw/2, ph/2);
             stage = new Stage(1);
 
-            prepareMonsters();
+            setInterval(() => {monsters.push(new Monster(1, randomX()))}, 450);
+            setInterval(()=> {if(player.lives >=0) score ++}, 150);
+            //setInterval(() => {monsters.push(new Monster(2, randomX()))}, 2000);
 
             window.requestAnimationFrame(gameFrame);
         });
     });
-
-}
-
-
-function randomSpawn(){
-    let randomStartX = Math.floor(Math.random() * (pw - 64)) + 32;
-    let randomSpawnDelay = Math.random() * 15;
-    return[randomStartX, randomSpawnDelay];
-}
-function prepareMonsters(mode) {
-
-    for (let i = 0; i < 20; i++) {
-        monsters.push(new Monster(1, randomSpawn()[0], randomSpawn()[1]));
-    }
-
 }
 
 function gameFrame(timestamp) {
@@ -58,22 +43,21 @@ function gameFrame(timestamp) {
     if (lastTimestamp === 0) lastTimestamp = timestamp;
     const frameLength = (timestamp - lastTimestamp) / 1000;
     lastTimestamp = timestamp;
-
     inputs(frameLength);
     processes(frameLength);
     outputs();
 
     window.requestAnimationFrame(gameFrame);
 }
-/*let collision = false;
-let collisionTime;*/
+
+
 function resolveCollision(){
-    for (let monster of monsters) {
-        monster.restart(randomSpawn()[0], randomSpawn()[1]);
-    }
+    for (let monster of monsters) monster.alive = false;
     stage.restart();
     player.lives -=1;
 }
+
+
 function processes(frameLength){
     console.log(player.lives);
     for( let monster of monsters){
@@ -84,13 +68,13 @@ function processes(frameLength){
         }
 
         if (separation(monster, player) < monster.image.height-2) {
-            monster.alive = false;
             resolveCollision();
         }
 
         if (!player.alive) monster.alive = false;
     }
 
+    console.log(score);
     monsters = monsters.filter(m => m.alive);
     stage.update(frameLength);
     player.update(frameLength);
@@ -115,7 +99,7 @@ const playableArea = new OffscreenCanvas(pw, ph);
 function outputs(){
 
     const pac = playableArea.getContext('2d');
-    pac.fillStyle = 'blue';
+    pac.fillStyle = 'red';
     pac.fillRect(0,0, pw, ph);
 
     stage.draw(pac);
@@ -136,7 +120,5 @@ function outputs(){
     gc.fillRect(0, 0, gw, gh);
 
     gc.drawImage(playableArea,gw/2 - pw/2, gh/2 - ph/2);
-
-
 
 }
