@@ -526,7 +526,7 @@ public class PlayersController {
         }
     }
 
-    @POST
+    @GET
     @Path("logout")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
@@ -536,6 +536,21 @@ public class PlayersController {
         try {
             if(token == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
+            }
+
+            PreparedStatement psCheckToken = Main.db.prepareStatement("SELECT EXISTS(SELECT * FROM Players WHERE token = ?)");
+            psCheckToken.setString(1, token);
+
+            ResultSet tokenResults = psCheckToken.executeQuery();
+            int exists = 0;
+            while (tokenResults.next()) {
+                exists = tokenResults.getInt(1);
+            }
+
+            if(exists==0){
+                {
+                    return "{\"error\": \"Token does not exist.\"}";
+                }
             }
             PreparedStatement psUpdateToken = Main.db.prepareStatement("UPDATE Players SET token = NULL WHERE token = ?");
             psUpdateToken.setString(1, token);
