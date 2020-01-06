@@ -11,19 +11,19 @@ function pageLoad() {
 
 function showDiv(optionType) {
     /*depending on the parameter that has been passed in, the various elements are hidden or shown*/
-    if( optionType == "login"){
+    if( optionType === "login"){
         /*an element with the display style "none" are unique because all of them actually disappear instead of being hidden away*/
         /*this allows for other elements to take their place, instead of being put below the hidden elements*/
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("loginForm").style.display = "block";
         document.getElementById("signUpConfirm").style.display = "none";
         document.getElementById("loginConfirm").style.display = "block";
-    }else if(optionType == "signUp"){
+    }else if(optionType === "signUp"){
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("loginForm").style.display = "block";
         document.getElementById("signUpConfirm").style.display = "block";
         document.getElementById("loginConfirm").style.display = "none";
-    }else if(optionType =="cancel"){
+    }else if(optionType ==="cancel"){
         document.getElementById("loginDiv").style.display = "block";
         document.getElementById("loginForm").style.display = "none";
         document.getElementById("signUpConfirm").style.display = "none";
@@ -36,10 +36,10 @@ function processPlayerData(processType) {
     const form = document.getElementById("loginForm");
     const formData = new FormData(form);
     /*if the processType is "login", then the login function will be run straight away, with the form data as the parameter*/
-    if(processType=="login"){
+    if(processType==="login"){
         login(formData);
     /*if the process type is "signUp then the /players/new api is first run*/
-    }else if(processType=="signUp"){
+    }else if(processType==="signUp"){
         /*the method is a post method, so this needs to be specified, and the body of the api is the form data*/
         fetch("/players/new", {method: 'post', body: formData}
         /*this is a promise function that returns the response in json*/

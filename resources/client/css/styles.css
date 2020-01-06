@@ -77,3 +77,22 @@ body {
     border:5px solid #c0006f;
 }
 
+#leaderboardTable{
+    margin:auto;
+    text-align: center;
+}
+#mainHeadingsRow{
+    font-size: 45pt;
+}
+.mainHeadings{
+    padding-left:50px;
+    padding-right: 50px;
+}
+#killHeadingsRow{
+    font-size: 30pt;
+}
+.killHeadings{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
