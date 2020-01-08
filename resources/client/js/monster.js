@@ -15,9 +15,9 @@ let loadMonsterImages = new Promise(function(resolve) {
         }
     };
 
-    for (let n = 1; n <= 2; n++) {
+    for (let i = 1; i <= 2; i++) {
         let img = new Image();
-        img.src = "/client/img/monster" + n + ".png";
+        img.src = "/client/img/monster" + i + ".png";
         img.onload = () => loadCheck();
         monsterImages.push(img);
     }
@@ -38,6 +38,8 @@ class Monster{
         this.dy = -300;
 
         this.alive = true;
+        /*this is the value of the monster, and if the player kills the monster then they will gain this amount of score*/
+        this.value = 100;
 
     }
 
