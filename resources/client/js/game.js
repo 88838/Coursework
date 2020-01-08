@@ -4,13 +4,26 @@ let lastTimestamp = 0;
 /*the keys that are pressed are stored as an object*/
 const pressedKeys = {};
 
+function createPlayer(){
+    fetch('/players/get/' + Cookies.get("token"), {method: 'get'}
+    ).then(response => response.json()
+    ).then(playerDb => {
+        let playerid = playerDb.playerid;
+        let skinid = playerDb.skinid;
+
+        console.log(playerid);
+        console.log(skinid);
+        player = new Player(playerid, skinid);
+    });
+
+}
 function pageLoad(){
     document.getElementById("mainMenuOption").addEventListener("click", ()=> window.location.href = "/client/index.html");
-
     /*if the key is pressed, it is set to true for that key*/
     /*once the key has been let go, it is set as false*/
     window.addEventListener("keydown", event => pressedKeys[event.key] = true);
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
+
 
     /*only once the image has loaded, is the first frame requested*/
     /*have to now load stage as well*/
@@ -19,13 +32,18 @@ function pageLoad(){
             loadMonsterImages.then(() => {
                 /*the star image now also needs to be loaded*/
                 loadStarImage.then(() => {
-                    player = new Player();
+
+                   /* createPlayer();*/
+                    player = new Player(1,1);
                     stage = new Stage(1);
 
                     /*if the player is alive, a new monster is pushed every 450 milliseconds*/
                     setInterval(() => {if (player.alive) monsters.push(new Monster(1, randomX()))}, 450);
+                    /*like the monsters and the score, the setInterval function is used*/
                     /*one star will show up every 5 seconds*/
                     setInterval(() => {if (player.alive) stars.push(new Star( randomX()))}, 5000);
+
+                    setInterval(() => {if (player.alive) player.score+=1}, 100);
                     /*the gameFrame function has to be requested for the first time in when the page loads*/
                     window.requestAnimationFrame(gameFrame);
                 });
@@ -35,7 +53,7 @@ function pageLoad(){
 
     /*if the player is alive, their score is increased by 1 every 100 milliseconds (by 10 every second)*/
     /*this is ongoing, so that even if the player doesn't kill any monsters or collects any currency, it still adds score for as long as they survive*/
-    setInterval(() => {if (player.alive) player.score+=1}, 100);
+
 }
 
 function gameFrame(timestamp) {
@@ -77,7 +95,13 @@ function inputs(frameLength){
         }
         /*if the player presses the space bar, then they are attacking*/
         if(pressedKeys[" "]){
-            player.attacking = true;
+            /*nothing changes unless the cooldown is false*/
+            if(!player.cooldown) {
+                /*the cooldown starts once the spacebar is pressed and the player attacks*/
+                /*the cooldownTimer counts down from 1 second*/
+                player.cooldownTimer = 1;
+                player.cooldown = true;
+            }
         }else{
             player.attacking = false;
         }
@@ -105,7 +129,7 @@ function playerRespawn(){
     if(stage.id === 3){
         player.artificialY = 50000;
     }else if(stage.id === 2){
-        player.artificialY=10000;
+        player.artificialY = 10000;
     }else{
         player.artificialY=0
     }
@@ -122,18 +146,41 @@ function monsterDeath(monster){
     monster.alive = false;
 }
 
+function starCollect(star){
+    /*the player's score is increased by 500 (the star's value)*/
+    player.score += star.value;
+    /*the player's currency is increased by 5 (0.01*500)*/
+    player.currency += star.value*0.01;
+    /*if the player collects the star it is no longer active, and will disappear*/
+    star.active = false;
+}
+
 function processes(frameLength){
-    /* console.log(player.lives);*/
-    /*this if statement has to be done backwards, with stage 3 being first*/
-    /*if it was the other way around, then once the player has reached stage 2, the if statement wouldn't carry on*/
 
     if(player.lives === 0) player.alive = false;
-
+    /*this if statement has to be done backwards, with stage 3 being first*/
+    /*if it was the other way around, then once the player has reached stage 2, the if statement wouldn't carry on*/
     if(player.artificialY >= 50000){
         stage.id = 3;
     } else if(player.artificialY >= 10000){
         stage.id = 2;
     }
+
+    /*the player is given a very short amount of time, between when the timer is 1 and 0.75 (equating to around 15 frames) where they are attacking and can kill an enemy*/
+    if(player.cooldownTimer > 0.75){
+        player.attacking = true;
+    }else{
+        player.attacking = false;
+    }
+    /*once the cooldown reaches 0 then the cooldown is set to false because it has finished*/
+    /*since the cooldown is false again, the spacebar will be registered if the player presses it, which will in turn trigger the cooldown*/
+    if(player.cooldownTimer <= 0){
+        /*the cooldown timer needs to be reset to 0 so that it doesn't become negative*/
+        /*otherwise, once the cooldown reached 0, then a couple more frame lengths could be taken away, making the timer negative*/
+        player.cooldownTimer = 0;
+        player.cooldown = false;
+    }
+
 
     for( let monster of monsters){
         monster.update(frameLength);
@@ -144,16 +191,16 @@ function processes(frameLength){
         }
 
         /*the player must be above the monster to be able to attack them*/
-        if(player.y < monster.y - player.image.height){
+        if(player.y < monster.y /* - player.image.height*/){
             /*for the attack to register, the distance between the monster and the player must be less than 80 pixels (monster height *2)*/
             /*the player must be attacking for the hit to register*/
-            if((separation(monster, player) < monster.image.height*1.25) && player.attacking === true) monsterDeath(monster);
+            if((separation(monster, player) < monster.image.height) && player.attacking === true) monsterDeath(monster);
 
         }
 
         /*if the distance between the current monster and the player is smaller than the height of the monster-2 then the resolveCollision function is run*/
         /*the reason why 2 is taken away, is so that a tiny bit of overlap is allowed, before it is registered as a collision*/
-        if (separation(monster, player) < monster.image.height-2) {
+        if (separation(monster, player) < monster.image.height-5) {
             /*if the player has 1 life left then they die the next time they get it, otherwise they respawn*/
             if (player.lives === 1){
                 player.alive = false;
@@ -174,13 +221,13 @@ function processes(frameLength){
 
     for (let star of stars){
         star.update(frameLength);
-        if (separation(star, player) < star.image.height-2){
-            player.score += star.value;
-            star.active = false;
-        }
+        /*this is very similar to the collision detection between the player and the monster, with 2 pixels of overlap*/
+        if (separation(star, player) < star.image.height-5) starCollect(star);
+        /*if the star moves off the screen, or if the player is dead, then it is no longer active, similar to the monsters*/
         if( star.y < -(star.image.height)) star.active = false;
         if(!player.alive) star.active = false;
     }
+    /*all the stars that are no longer active will be filtered out of the stars array*/
     stars = stars.filter(s => s.active);
 }
 
@@ -193,8 +240,6 @@ function outputs(){
     /*to check the canvas is working, I have filled the playable area with red*/
     pac.fillStyle = "blue";
     pac.fillRect(0,0, pw, ph);
-
-    console.log(player.score);
 
     stage.draw(pac);
     /*the player is drawn, passing in the 'pac' as the context*/

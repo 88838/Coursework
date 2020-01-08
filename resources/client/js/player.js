@@ -14,7 +14,10 @@ let loadPlayerImage = new Promise(function(resolve) {
 
 class Player{
     /*a constructor creates the player object*/
-    constructor(){
+    constructor(playerid, skinid){
+        this.id = playerid;
+        this.skinid = skinid;
+
         /*the player's x and y coordinates are in the middle of the playable area*/
         this.x = pw/2;
         this.y = ph/2;
@@ -35,6 +38,13 @@ class Player{
         this.attacking = false;
         /*player's score starts off as 0*/
         this.score = 0;
+        /*the player's currency is 0 because it's the session currency*/
+        this.currency = 0;
+
+        /*if the cooldown is false, then there is no cooldown and the player can attack*/
+        this.cooldown = false;
+        /*the cooldown timer is the time left of the cooldown, set to 0 at the start because the player has not yet attacked*/
+        this.cooldownTimer = 0;
     }
     draw(context){
         /*if the player is dead, they are not drawn*/
@@ -52,8 +62,10 @@ class Player{
         this.x += frameLength * this.dx;
         this.artificialY += frameLength * this.dy;
 
-/*
-        this.reloadTimer -= frameLength / this.reloadRate;*/
+        /*if the cooldown is true then the cooldownTimer will decrease by one framelength per frame*/
+        if(this.cooldown) this.cooldownTimer -= frameLength;
+
+
 
         /*if the x coordinate is smaller than half the player's width, then they the x coordinate is reset to that same value*/
         if (this.x < this.image.width/2) {

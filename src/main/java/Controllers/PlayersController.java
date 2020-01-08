@@ -124,6 +124,32 @@ public class PlayersController {
         }
     }
 
+    @GET
+    @Path("get/{token}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String playersList(@PathParam("token") String token) {
+        System.out.println("players/get/" + token);
+        try {
+            if(token == null){
+                throw new Exception("Token is missing in the HTTP request");
+            }
+            int playerid = identifyPlayer(token);
+            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT skinid FROM Players WHERE playerid = ?");
+            psPlayerInfo.setInt(1, playerid);
+            ResultSet playerInfoResults = psPlayerInfo.executeQuery();
+
+            JSONObject item = new JSONObject();
+            if (playerInfoResults.next()) {
+                item.put("playerid", playerid);
+                item.put("skinid", playerInfoResults.getString(1));
+            }
+            return item.toString();
+        } catch (Exception exception) {
+            System.out.println("Database error: " + exception.getMessage());
+            return "{\"error\": \"Unable to get player. Please see server console for more info.\"}";
+        }
+    }
+
     @POST
     @Path("new")
     @Consumes(MediaType.MULTIPART_FORM_DATA)

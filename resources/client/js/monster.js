@@ -26,9 +26,9 @@ let loadMonsterImages = new Promise(function(resolve) {
 
 class Monster{
     constructor(id, x){
-        this.type = id;
+        this.id = id;
 
-        this.image = monsterImages[id];
+        this.image = monsterImages[this.id-1];
         /*the starting x coordinate will be passed in as a parameter*/
         this.x = x;
         /*the starting y coordinate is half of the image's height below the canvas*/
