@@ -1,59 +1,57 @@
 /*the player variable is created, and will get assigned a value later*/
 let player;
-/*the playerImage is a new image object */
-let playerImage = new Image();
+const playerInfo = [];
+/*player image is now skin images because there is more than one image*/
+const skinImages = [];
 
-/*loadPlayerImage is assigned a promise object*/
-let loadPlayerImage = new Promise(function(resolve) {
-    /*the source of the image is assigned*/
-    /*for now, there is just one image, as the skins have not yet been designed*/
-    playerImage.src = "/client/img/player.png";
-    /*the promise is resolved once the image loads*/
-    playerImage.onload = () => resolve();
-});
-
-let loadPlayerImages = new Promise(function(resolve) {
+let loadSkinImages = new Promise(function(resolve) {
     let loadedImageCount = 0;
-
-    let loadCheck = function() {
+    /*the loadCheck takes in the parameter of the skins that are returned in the form of the json response*/
+    let loadCheck = function(skinsDb) {
         loadedImageCount++;
-        if (loadedImageCount === monsterImageCount) {
+        /*rather than hard coding the amount of images that are meant to load, the length of the json response is used instead*/
+        if (loadedImageCount === skinsDb.length) {
             resolve();
         }
     };
     fetch('/skins/list' , {method: 'get'}
     ).then(response => response.json()
-        /*this must be called playerDb as to not get confused with the player object that is being used in the game*/
     ).then(skinsDb => {
         for (let skinDb of skinsDb) {
+/*            console.log(skinDb.imageFile);
+            console.log(skinDb.skinid);*/
             let img = new Image();
+            /*the temporary image object's source is taken from the skins in the json response*/
             img.src = skinDb.imageFile;
-            img.onload = () => loadCheck();
-            skinImages.push(img, skinsDb.skinid);
+            /*when the image loads, the loadCheck function is run*/
+            img.onload = () => loadCheck(skinsDb);
+            /*the skin images array is filled with the skinid, and the image object*/
+            skinImages.push([skinDb.skinid, img]);
         }
     });
-
 });
 
-/*this promise function works in the same way as the ones which are used to load the images of the monster, stage and player*/
+/*this promise works in the same way as the ones which are used to load the images of the monster, stage and player*/
 let createPlayer = new Promise(function(resolve) {
     fetch('/players/get/' + Cookies.get("token"), {method: 'get'}
     ).then(response => response.json()
         /*this must be called playerDb as to not get confused with the player object that is being used in the game*/
     ).then(playerDb => {
-        console.log("database player id:" + playerDb.playerid);
-        console.log("database skin id:" + playerDb.skinid);
         /*the player is created using the parameters of the playerid and skinid from the database*/
-        player = new Player(playerDb.playerid, playerDb.skinid);
-        console.log("object player id:" + player.playerid);
-        console.log("object skin id:" + player.skinid);
+        let img = new Image();
+
+/*        playerInfo.push([playerDb.playerid, playerDb.skinid, img]);*/
+        player = new Player(playerDb.playerid, playerDb.skinid, img);
+        /*the player's skin must be loaded before the promise can be resolved*/
         resolve();
     });
 });
 
+
+
 class Player{
     /*a constructor creates the player object*/
-    constructor(playerid, skinid){
+    constructor(playerid, skinid, image){
         /*these two attributes will be using the values from the database*/
         this.playerid = playerid;
         this.skinid = skinid;
@@ -70,7 +68,7 @@ class Player{
         this.dy = 500;
 
         /*the player's skin is the playerImage object that as declared earlier*/
-        this.image = playerImage;
+        this.image = image;
         /*the player starts off as alive, and with 3 lives*/
         this.alive = true;
         this.lives = 3;
@@ -118,6 +116,16 @@ class Player{
             this.x = pw - this.image.width/2;
             this.dx = 0;
         }
+
+    }
+    setSkin(){
+        for(let x = 0; x < skinImages.length; x++){
+            /*if the player's skinid is the same as the one in the array, then the player's image is set to the one in the skins array*/
+            if(this.skinid == skinImages[x][0]){
+                this.image = skinImages[x][1];
+            }
+        }
+        /*this loops through every row in the array*/
 
     }
 }

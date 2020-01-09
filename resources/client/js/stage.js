@@ -33,10 +33,10 @@ let loadStageImage = new Promise(function(resolve) {
 
 class Stage{
     /*the id is passed into the constructor*/
-    constructor(id) {
-        this.id = id;
+    constructor(stageid) {
+        this.stageid = stageid;
         /*the image is set to the id-1 because arrays start with the index 0*/
-        this.image = stageImages[this.id-1];
+        this.image = stageImages[this.stageid-1];
         /*the starting y coordinate is in the middle of the canvas*/
         this.y = ph/2;
         /*the stage is scrolling upwards, so it has a negative velocity*/
@@ -53,7 +53,7 @@ class Stage{
 
     update(frameLength) {
         if (!player.alive) return;
-        this.image = stageImages[this.id-1];
+        this.image = stageImages[this.stageid-1];
         /*when the y coordinate travels 595 pixels upwards (the whole height of the image -5, to account for frame skipping), then the y coordinate is reset*/
         if(this.y <= (-this.image.height/2+5)) this.y = ph/2;
         this.y += frameLength * this.dy;

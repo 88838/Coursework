@@ -1,10 +1,10 @@
-const monsterImageCount = 1;
-const monsterImages = [];
+/*const monsterImageCount = 1;*/
+const monsterInfo = [];
 
 /*because there is multiple monsters, the monsters are stored as an array*/
 let monsters = [];
 
-let loadMonsterImages = new Promise(function(resolve) {
+/*let loadMonsterImages = new Promise(function(resolve) {
 
     let loadedImageCount = 0;
 
@@ -22,13 +22,45 @@ let loadMonsterImages = new Promise(function(resolve) {
         monsterImages.push(img);
     }
 
+});*/
+
+let loadMonsterInfo = new Promise(function(resolve) {
+    let loadedImageCount = 0;
+    /*the loadCheck takes in the parameter of the skins that are returned in the form of the json response*/
+    let loadCheck = function(monstersDb) {
+        loadedImageCount++;
+        /*rather than hard coding the amount of images that are meant to load, the length of the json response is used instead*/
+        if (loadedImageCount === monstersDb.length) {
+            resolve();
+        }
+    };
+    fetch('/monsters/list' , {method: 'get'}
+    ).then(response => response.json()
+    ).then(monstersDb => {
+        for (let monsterDb of monstersDb) {
+            console.log(monsterDb.imageFile);
+            console.log(monsterDb.monsterid);
+            console.log(monsterDb.movementType);
+            console.log(monsterDb.attackType);
+            console.log(monsterDb.stageid);
+            let img = new Image();
+            img.src = monsterDb.imageFile;
+
+            img.onload = () => loadCheck(monstersDb);
+
+            monsterInfo.push([monsterDb.monsterid, img, monsterDb.movementType, monsterDb.attackType, monsterDb.stageid]);
+        }
+    });
 });
 
 class Monster{
-    constructor(id, x){
-        this.id = id;
+    constructor(monsterid, image, movementType, attackType, stageid, x){
+        this.monsterid = monsterid;
+        this.image = image;
+        this.movementType = movementType;
+        this.attackType = attackType;
+        this.stageid = stageid;
 
-        this.image = monsterImages[this.id-1];
         /*the starting x coordinate will be passed in as a parameter*/
         this.x = x;
         /*the starting y coordinate is half of the image's height below the canvas*/

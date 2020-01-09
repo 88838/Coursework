@@ -3,7 +3,24 @@ let lastTimestamp = 0;
 
 /*the keys that are pressed are stored as an object*/
 const pressedKeys = {};
-
+function randomX(){
+    return Math.floor(Math.random() * (pw - 64)) + 32;
+}
+function spawnMonster(){
+    for(let x = 0; x < monsterInfo.length; x++){
+        if(stage.stageid == monsterInfo[x][4]){
+            console.log("spawning");
+            console.log(monsterInfo[x][0]);
+            console.log(monsterInfo[x][1]);
+            console.log(monsterInfo[x][2]);
+            console.log(monsterInfo[x][3]);
+            monsters.push(new Monster(monsterInfo[x][0], monsterInfo[x][1], monsterInfo[x][2], monsterInfo[x][3], monsterInfo[x][4], randomX()));
+        }
+    }
+    for(let monster of monsters){
+        console.log("x "+ monster.x);
+    }
+}
 
 function pageLoad(){
     document.getElementById("mainMenuOption").addEventListener("click", ()=> window.location.href = "/client/index.html");
@@ -13,19 +30,23 @@ function pageLoad(){
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
 
 
+
+
     /*only once has loaded, is the first frame requested*/
     loadStageImage.then(() =>{
-        loadPlayerImage.then(() => {
-            loadMonsterImages.then(() => {
+        loadSkinImages.then(() => {
+            loadMonsterInfo.then(() => {
                 loadStarImage.then(() => {
-                    /*another promise function is added to the chain before the first frame is requested*/
                     createPlayer.then(() => {
-
+                        player.setSkin();
                         stage = new Stage(1);
+                        console.log(stage.stageid);
+                        console.log(stage.image.height);
+                        console.log("monster1 stage id: " +monsterInfo[0][4]);
 
                         /*if the player is alive, a new monster is pushed every 450 milliseconds*/
                         setInterval(() => {
-                            if (player.alive) monsters.push(new Monster(1, randomX()))
+                            if (player.alive) spawnMonster();
                         }, 450);
                         /*like the monsters and the score, the setInterval function is used*/
                         /*one star will show up every 5 seconds*/
@@ -44,7 +65,7 @@ function pageLoad(){
             });
         });
     });
-
+/*    console.log("player image " + player.image);*/
     /*if the player is alive, their score is increased by 1 every 100 milliseconds (by 10 every second)*/
     /*this is ongoing, so that even if the player doesn't kill any monsters or collects any currency, it still adds score for as long as they survive*/
 
@@ -109,9 +130,7 @@ function separation(entity1, entity2) {
         + Math.pow(entity1.y - entity2.y, 2));
 }
 
-function randomX(){
-    return Math.floor(Math.random() * (pw - 64)) + 32;
-}
+
 
 function playerRespawn(){
     /*all the monsters are killed*/
@@ -120,9 +139,9 @@ function playerRespawn(){
     /*the player's x coordinate is reset back to the middle, and their velocity is reset to 0*/
     stage.y = ph/2;
     /*the player's artificialY needs to be reset to whichever stage they reached, each time they respawn*/
-    if(stage.id === 3){
+    if(stage.stageid === 3){
         player.artificialY = 50000;
-    }else if(stage.id === 2){
+    }else if(stage.stageid === 2){
         player.artificialY = 10000;
     }else{
         player.artificialY=0
@@ -154,10 +173,10 @@ function processes(frameLength){
     if(player.lives === 0) player.alive = false;
     /*this if statement has to be done backwards, with stage 3 being first*/
     /*if it was the other way around, then once the player has reached stage 2, the if statement wouldn't carry on*/
-    if(player.artificialY >= 50000){
-        stage.id = 3;
-    } else if(player.artificialY >= 10000){
-        stage.id = 2;
+    if(player.artificialY >= 5000){
+        stage.stageid = 3;
+    } else if(player.artificialY >= 1000){
+        stage.stageid = 2;
     }
 
     /*the player is given a very short amount of time, between when the timer is 1 and 0.75 (equating to around 15 frames) where they are attacking and can kill an enemy*/
