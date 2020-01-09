@@ -12,10 +12,50 @@ let loadPlayerImage = new Promise(function(resolve) {
     playerImage.onload = () => resolve();
 });
 
+let loadPlayerImages = new Promise(function(resolve) {
+    let loadedImageCount = 0;
+
+    let loadCheck = function() {
+        loadedImageCount++;
+        if (loadedImageCount === monsterImageCount) {
+            resolve();
+        }
+    };
+    fetch('/skins/list' , {method: 'get'}
+    ).then(response => response.json()
+        /*this must be called playerDb as to not get confused with the player object that is being used in the game*/
+    ).then(skinsDb => {
+        for (let skinDb of skinsDb) {
+            let img = new Image();
+            img.src = skinDb.imageFile;
+            img.onload = () => loadCheck();
+            skinImages.push(img, skinsDb.skinid);
+        }
+    });
+
+});
+
+/*this promise function works in the same way as the ones which are used to load the images of the monster, stage and player*/
+let createPlayer = new Promise(function(resolve) {
+    fetch('/players/get/' + Cookies.get("token"), {method: 'get'}
+    ).then(response => response.json()
+        /*this must be called playerDb as to not get confused with the player object that is being used in the game*/
+    ).then(playerDb => {
+        console.log("database player id:" + playerDb.playerid);
+        console.log("database skin id:" + playerDb.skinid);
+        /*the player is created using the parameters of the playerid and skinid from the database*/
+        player = new Player(playerDb.playerid, playerDb.skinid);
+        console.log("object player id:" + player.playerid);
+        console.log("object skin id:" + player.skinid);
+        resolve();
+    });
+});
+
 class Player{
     /*a constructor creates the player object*/
     constructor(playerid, skinid){
-        this.id = playerid;
+        /*these two attributes will be using the values from the database*/
+        this.playerid = playerid;
         this.skinid = skinid;
 
         /*the player's x and y coordinates are in the middle of the playable area*/

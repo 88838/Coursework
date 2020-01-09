@@ -4,19 +4,7 @@ let lastTimestamp = 0;
 /*the keys that are pressed are stored as an object*/
 const pressedKeys = {};
 
-function createPlayer(){
-    fetch('/players/get/' + Cookies.get("token"), {method: 'get'}
-    ).then(response => response.json()
-    ).then(playerDb => {
-        let playerid = playerDb.playerid;
-        let skinid = playerDb.skinid;
 
-        console.log(playerid);
-        console.log(skinid);
-        player = new Player(playerid, skinid);
-    });
-
-}
 function pageLoad(){
     document.getElementById("mainMenuOption").addEventListener("click", ()=> window.location.href = "/client/index.html");
     /*if the key is pressed, it is set to true for that key*/
@@ -25,27 +13,33 @@ function pageLoad(){
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
 
 
-    /*only once the image has loaded, is the first frame requested*/
-    /*have to now load stage as well*/
+    /*only once has loaded, is the first frame requested*/
     loadStageImage.then(() =>{
         loadPlayerImage.then(() => {
             loadMonsterImages.then(() => {
-                /*the star image now also needs to be loaded*/
                 loadStarImage.then(() => {
+                    /*another promise function is added to the chain before the first frame is requested*/
+                    createPlayer.then(() => {
 
-                   /* createPlayer();*/
-                    player = new Player(1,1);
-                    stage = new Stage(1);
+                        stage = new Stage(1);
 
-                    /*if the player is alive, a new monster is pushed every 450 milliseconds*/
-                    setInterval(() => {if (player.alive) monsters.push(new Monster(1, randomX()))}, 450);
-                    /*like the monsters and the score, the setInterval function is used*/
-                    /*one star will show up every 5 seconds*/
-                    setInterval(() => {if (player.alive) stars.push(new Star( randomX()))}, 5000);
+                        /*if the player is alive, a new monster is pushed every 450 milliseconds*/
+                        setInterval(() => {
+                            if (player.alive) monsters.push(new Monster(1, randomX()))
+                        }, 450);
+                        /*like the monsters and the score, the setInterval function is used*/
+                        /*one star will show up every 5 seconds*/
+                        setInterval(() => {
+                            if (player.alive) stars.push(new Star(randomX()))
+                        }, 5000);
 
-                    setInterval(() => {if (player.alive) player.score+=1}, 100);
-                    /*the gameFrame function has to be requested for the first time in when the page loads*/
-                    window.requestAnimationFrame(gameFrame);
+                        setInterval(() => {
+                            if (player.alive) player.score += 1
+                        }, 100);
+                        /*the gameFrame function has to be requested for the first time in when the page loads*/
+                        window.requestAnimationFrame(gameFrame);
+
+                    });
                 });
             });
         });
@@ -194,12 +188,12 @@ function processes(frameLength){
         if(player.y < monster.y /* - player.image.height*/){
             /*for the attack to register, the distance between the monster and the player must be less than 80 pixels (monster height *2)*/
             /*the player must be attacking for the hit to register*/
-            if((separation(monster, player) < monster.image.height) && player.attacking === true) monsterDeath(monster);
+            if((separation(monster, player) < monster.image.height+5) && player.attacking === true) monsterDeath(monster);
 
         }
 
         /*if the distance between the current monster and the player is smaller than the height of the monster-2 then the resolveCollision function is run*/
-        /*the reason why 2 is taken away, is so that a tiny bit of overlap is allowed, before it is registered as a collision*/
+        /*the reason why 5 is taken away, is so that a tiny bit of overlap is allowed, before it is registered as a collision*/
         if (separation(monster, player) < monster.image.height-5) {
             /*if the player has 1 life left then they die the next time they get it, otherwise they respawn*/
             if (player.lives === 1){
