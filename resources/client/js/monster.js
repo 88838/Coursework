@@ -29,10 +29,9 @@ let loadMonstersInfo = new Promise(function(resolve) {
 
 class Monster{
     /*all of the attributes from the database need to be passed into the constructor*/
-    constructor(monsterid, image, movementType, attackType, stageid, x){
+    constructor(monsterid, image, attackType, stageid, x, dx){
         this.monsterid = monsterid;
         this.image = image;
-        this.movementType = movementType;
         this.attackType = attackType;
         this.stageid = stageid;
 
@@ -40,13 +39,13 @@ class Monster{
         this.x = x;
         /*the starting y coordinate is half of the image's height below the canvas*/
         this.y = ph + this.image.height/2;
-        this.dx = 0;
+        this.dx = dx;
         /*the monsters have a negative velocity, so they are moving up, which makes the player look like they are falling*/
-        this.dy = -300;
+        this.dy = -350;
 
         this.alive = true;
         /*this is the value of the monster, and if the player kills the monster then they will gain this amount of score*/
-        this.value = 100;
+        this.value = this.monsterid*100;
 
     }
 
@@ -61,6 +60,16 @@ class Monster{
         this.x += frameLength * this.dx;
         this.y += frameLength * this.dy;
 
+        if (this.x < this.image.width/2) {
+            this.x = this.image.width/2;
+            /*the velocity is set to the negative of the current velocity, causing them to chang direction and essentially bounce off the 'wall'*/
+            this.dx = -this.dx;
+        }
+        /*the same happens on the other side of the playable area*/
+        if (this.x > pw - this.image.width/2) {
+            this.x = pw - this.image.width/2;
+            this.dx = -this.dx;
+        }
     }
 }
 

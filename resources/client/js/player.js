@@ -38,10 +38,8 @@ let loadPlayer = new Promise(function(resolve) {
         /*this must be called playerDb as to not get confused with the player object that is being used in the game*/
     ).then(playerDb => {
         /*the player is created using the parameters of the playerid and skinid from the database*/
-        let img = new Image();
 
-/*        playerInfo.push([playerDb.playerid, playerDb.skinid, img]);*/
-        player = new Player(playerDb.playerid, playerDb.skinid, img);
+        player = new Player(playerDb.playerid, playerDb.skinid);
         /*the player's skin must be loaded before the promise can be resolved*/
         resolve();
     });
@@ -51,7 +49,7 @@ let loadPlayer = new Promise(function(resolve) {
 
 class Player{
     /*a constructor creates the player object*/
-    constructor(playerid, skinid, image){
+    constructor(playerid, skinid){
         /*these two attributes will be using the values from the database*/
         this.playerid = playerid;
         this.skinid = skinid;

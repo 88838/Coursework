@@ -4,14 +4,29 @@ let lastTimestamp = 0;
 /*the keys that are pressed are stored as an object*/
 const pressedKeys = {};
 function randomX(){
-    return Math.floor(Math.random() * (pw - 64)) + 32;
+    return (Math.random() * (pw - 64)) + 32;
 }
+
 function spawnMonster(){
     /*same as checking whether the skinid of the player matches the skinid of the skin, the stageid is checked against each monster in the info array*/
     for(let monsterInfo of monstersInfo){
         if(stage.stageid == monsterInfo[4]){
-            /*if the current stage matched the info in the loop then a new monster is pushed*/
-            monsters.push(new Monster(monsterInfo[0], monsterInfo[1], monsterInfo[2], monsterInfo[3], monsterInfo[4], randomX()));
+            if(monsterInfo[2]==="horizontal"){
+                /*if the movement type is horizontal then the monster either has a velocity of -175 or (+)175*/
+                monsters.push(new Monster(monsterInfo[0], monsterInfo[1], monsterInfo[3], monsterInfo[4], randomX(), ((Math.round(Math.random()) * 2) - 1) * 175));
+            }else if(monsterInfo[2]==="stationary"){
+                /*otherwise, if the type is stationary then the velocity is 0 */
+                monsters.push(new Monster(monsterInfo[0], monsterInfo[1], monsterInfo[3], monsterInfo[4], randomX(), 0));
+            }
+        }
+    }
+}
+
+function spawnProjectile(){
+    for(let monster of monsters){
+        if(monster.attackType==="projectile"){
+            projectiles.push(new Projectile(monster.x, monster.y))
+            console.log("x: " + monster.x + ", y: " + monster.y)
         }
     }
 }
@@ -36,7 +51,11 @@ function pageLoad(){
                         /*if the player is alive, a new monster is pushed every 450 milliseconds*/
                         setInterval(() => {
                             if (player.alive) spawnMonster()
-                        }, 450);
+                        }, 350);
+
+                        setInterval(() => {
+                            if (player.alive) spawnProjectile()
+                        }, 750);
                         /*like the monsters and the score, the setInterval function is used*/
                         /*one star will show up every 5 seconds*/
                         setInterval(() => {
@@ -123,21 +142,14 @@ function playerRespawn(){
     /*all the monsters are killed*/
     for (let monster of monsters) monster.alive = false;
     for (let star of stars) star.active = false;
+    for (let projectile of projectiles) projectile.active = false;
     /*the player's x coordinate is reset back to the middle, and their velocity is reset to 0*/
     stage.y = ph/2;
     /*the player's artificialY needs to be reset to whichever stage they reached, each time they respawn*/
+    /*instead of checking each id of the stage and manually setting the player's artificial y coordinate, it is instead taken from the information provided by the database*/
     for(let stageInfo of stagesInfo){
         if(stage.stageid == stageInfo[0]) player.artificialY = stageInfo[2];
     }
-/*    if(stage.stageid === 4) {
-        player.artificialY = 100000;
-    }else if(stage.stageid === 3){
-        player.artificialY = 50000;
-    }else if(stage.stageid === 2){
-        player.artificialY = 10000;
-    }else{
-        player.artificialY=0
-    }*/
 
     player.x = pw/2;
     player.dx = 0;
@@ -163,16 +175,10 @@ function starCollect(star){
 
 function processes(frameLength){
 
+
     if(player.lives === 0) player.alive = false;
-    /*this if statement has to be done backwards, with stage 3 being first*/
-    /*if it was the other way around, then once the player has reached stage 2, the if statement wouldn't carry on*/
-    /*if(player.artificialY >= 10000) {
-        stage.stageid = 4;
-    }else if(player.artificialY >= 5000){
-        stage.stageid = 3;
-    } else if(player.artificialY >= 1000){
-        stage.stageid = 2;
-    }*/
+
+    /*the setImage method is used instead of manually checking the stageid*/
     stage.setImage();
     /*the player is given a very short amount of time, between when the timer is 1 and 0.75 (equating to around 15 frames) where they are attacking and can kill an enemy*/
     if(player.cooldownTimer > 0.75){
@@ -180,6 +186,7 @@ function processes(frameLength){
     }else{
         player.attacking = false;
     }
+
     /*once the cooldown reaches 0 then the cooldown is set to false because it has finished*/
     /*since the cooldown is false again, the spacebar will be registered if the player presses it, which will in turn trigger the cooldown*/
     if(player.cooldownTimer <= 0){
@@ -188,7 +195,19 @@ function processes(frameLength){
         player.cooldownTimer = 0;
         player.cooldown = false;
     }
-
+    for (let projectile of projectiles){
+        projectile.update(frameLength);
+        if (separation(projectile, player) < player.image.height/2) {
+            projectile.active = false;
+            if (player.lives === 1){
+                player.alive = false;
+            }else{
+                playerRespawn();
+            }
+        }
+        if (!player.alive) projectile.active = false;
+    }
+    projectiles = projectiles.filter(p => p.active);
 
     for( let monster of monsters){
         monster.update(frameLength);
@@ -199,7 +218,7 @@ function processes(frameLength){
         }
 
         /*the player must be above the monster to be able to attack them*/
-        if(player.y < monster.y /* - player.image.height*/){
+        if(player.y < monster.y){
             /*for the attack to register, the distance between the monster and the player must be less than 80 pixels (monster height *2)*/
             /*the player must be attacking for the hit to register*/
             if((separation(monster, player) < monster.image.height+5) && player.attacking === true) monsterDeath(monster);
@@ -208,14 +227,14 @@ function processes(frameLength){
 
         /*if the distance between the current monster and the player is smaller than the height of the monster-2 then the resolveCollision function is run*/
         /*the reason why 5 is taken away, is so that a tiny bit of overlap is allowed, before it is registered as a collision*/
-        if (separation(monster, player) < monster.image.height-5) {
-            /*if the player has 1 life left then they die the next time they get it, otherwise they respawn*/
+/*        if (separation(monster, player) < monster.image.height-5) {
+            /!*if the player has 1 life left then they die the next time they get it, otherwise they respawn*!/
             if (player.lives === 1){
                 player.alive = false;
             }else{
                 playerRespawn();
             }
-        }
+        }*/
 
         /*if the player is not alive then the monster is also not alive*/
         if (!player.alive) monster.alive = false;
@@ -224,12 +243,14 @@ function processes(frameLength){
     /*this means a new array is created, with only the monsters that are still alive*/
     monsters = monsters.filter(m => m.alive);
 
+
     stage.update(frameLength);
     player.update(frameLength);
 
+
     for (let star of stars){
         star.update(frameLength);
-        /*this is very similar to the collision detection between the player and the monster, with 2 pixels of overlap*/
+        /*this is very similar to the collision detection between the player and the monster, with 5 pixels of overlap*/
         if (separation(star, player) < star.image.height-5) starCollect(star);
         /*if the star moves off the screen, or if the player is dead, then it is no longer active, similar to the monsters*/
         if( star.y < -(star.image.height)) star.active = false;
@@ -243,7 +264,6 @@ function processes(frameLength){
 const playableArea = new OffscreenCanvas(pw, ph);
 
 function outputs(){
-    console.log(player.artificialY);
     /*the context for the playable area is set as a constant called 'pac' (playable area canvas)*/
     const pac = playableArea.getContext('2d');
     /*to check the canvas is working, I have filled the playable area with red*/
@@ -253,6 +273,9 @@ function outputs(){
     stage.draw(pac);
     /*the player is drawn, passing in the 'pac' as the context*/
     player.draw(pac);
+    for (let projectile of projectiles){
+        projectile.draw(pac);
+    }
     for(let monster of monsters){
         monster.draw(pac);
     }
@@ -262,7 +285,6 @@ function outputs(){
     }
 
 
-    // ------------------
     /*the game canvas is 'gc'*/
     const gameCanvas = document.getElementById('gameCanvas');
     const gc = gameCanvas.getContext('2d');
