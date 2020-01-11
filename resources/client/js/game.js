@@ -7,18 +7,12 @@ function randomX(){
     return Math.floor(Math.random() * (pw - 64)) + 32;
 }
 function spawnMonster(){
-    for(let x = 0; x < monsterInfo.length; x++){
-        if(stage.stageid == monsterInfo[x][4]){
-            console.log("spawning");
-            console.log(monsterInfo[x][0]);
-            console.log(monsterInfo[x][1]);
-            console.log(monsterInfo[x][2]);
-            console.log(monsterInfo[x][3]);
-            monsters.push(new Monster(monsterInfo[x][0], monsterInfo[x][1], monsterInfo[x][2], monsterInfo[x][3], monsterInfo[x][4], randomX()));
+    /*same as checking whether the skinid of the player matches the skinid of the skin, the stageid is checked against each monster in the info array*/
+    for(let monsterInfo of monstersInfo){
+        if(stage.stageid == monsterInfo[4]){
+            /*if the current stage matched the info in the loop then a new monster is pushed*/
+            monsters.push(new Monster(monsterInfo[0], monsterInfo[1], monsterInfo[2], monsterInfo[3], monsterInfo[4], randomX()));
         }
-    }
-    for(let monster of monsters){
-        console.log("x "+ monster.x);
     }
 }
 
@@ -29,24 +23,19 @@ function pageLoad(){
     window.addEventListener("keydown", event => pressedKeys[event.key] = true);
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
 
-
-
-
     /*only once has loaded, is the first frame requested*/
-    loadStageImage.then(() =>{
+    loadStagesInfo .then(() =>{
         loadSkinImages.then(() => {
-            loadMonsterInfo.then(() => {
+            loadMonstersInfo.then(() => {
                 loadStarImage.then(() => {
-                    createPlayer.then(() => {
+                    loadPlayer.then(() => {
                         player.setSkin();
-                        stage = new Stage(1);
-                        console.log(stage.stageid);
-                        console.log(stage.image.height);
-                        console.log("monster1 stage id: " +monsterInfo[0][4]);
+                        stage = new Stage(stagesInfo[0][0], stagesInfo[0][1]);
+
 
                         /*if the player is alive, a new monster is pushed every 450 milliseconds*/
                         setInterval(() => {
-                            if (player.alive) spawnMonster();
+                            if (player.alive) spawnMonster()
                         }, 450);
                         /*like the monsters and the score, the setInterval function is used*/
                         /*one star will show up every 5 seconds*/
@@ -54,6 +43,8 @@ function pageLoad(){
                             if (player.alive) stars.push(new Star(randomX()))
                         }, 5000);
 
+                        /*if the player is alive, their score is increased by 1 every 100 milliseconds (by 10 every second)*/
+                        /*this is ongoing, so that even if the player doesn't kill any monsters or collects any currency, it still adds score for as long as they survive*/
                         setInterval(() => {
                             if (player.alive) player.score += 1
                         }, 100);
@@ -65,10 +56,6 @@ function pageLoad(){
             });
         });
     });
-/*    console.log("player image " + player.image);*/
-    /*if the player is alive, their score is increased by 1 every 100 milliseconds (by 10 every second)*/
-    /*this is ongoing, so that even if the player doesn't kill any monsters or collects any currency, it still adds score for as long as they survive*/
-
 }
 
 function gameFrame(timestamp) {
@@ -139,13 +126,19 @@ function playerRespawn(){
     /*the player's x coordinate is reset back to the middle, and their velocity is reset to 0*/
     stage.y = ph/2;
     /*the player's artificialY needs to be reset to whichever stage they reached, each time they respawn*/
-    if(stage.stageid === 3){
+    for(let stageInfo of stagesInfo){
+        if(stage.stageid == stageInfo[0]) player.artificialY = stageInfo[2];
+    }
+/*    if(stage.stageid === 4) {
+        player.artificialY = 100000;
+    }else if(stage.stageid === 3){
         player.artificialY = 50000;
     }else if(stage.stageid === 2){
         player.artificialY = 10000;
     }else{
         player.artificialY=0
-    }
+    }*/
+
     player.x = pw/2;
     player.dx = 0;
     /*the player loses a life*/
@@ -173,12 +166,14 @@ function processes(frameLength){
     if(player.lives === 0) player.alive = false;
     /*this if statement has to be done backwards, with stage 3 being first*/
     /*if it was the other way around, then once the player has reached stage 2, the if statement wouldn't carry on*/
-    if(player.artificialY >= 5000){
+    /*if(player.artificialY >= 10000) {
+        stage.stageid = 4;
+    }else if(player.artificialY >= 5000){
         stage.stageid = 3;
     } else if(player.artificialY >= 1000){
         stage.stageid = 2;
-    }
-
+    }*/
+    stage.setImage();
     /*the player is given a very short amount of time, between when the timer is 1 and 0.75 (equating to around 15 frames) where they are attacking and can kill an enemy*/
     if(player.cooldownTimer > 0.75){
         player.attacking = true;
@@ -248,6 +243,7 @@ function processes(frameLength){
 const playableArea = new OffscreenCanvas(pw, ph);
 
 function outputs(){
+    console.log(player.artificialY);
     /*the context for the playable area is set as a constant called 'pac' (playable area canvas)*/
     const pac = playableArea.getContext('2d');
     /*to check the canvas is working, I have filled the playable area with red*/

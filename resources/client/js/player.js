@@ -1,6 +1,6 @@
 /*the player variable is created, and will get assigned a value later*/
 let player;
-const playerInfo = [];
+
 /*player image is now skin images because there is more than one image*/
 const skinImages = [];
 
@@ -20,19 +20,19 @@ let loadSkinImages = new Promise(function(resolve) {
         for (let skinDb of skinsDb) {
 /*            console.log(skinDb.imageFile);
             console.log(skinDb.skinid);*/
-            let img = new Image();
+            let image = new Image();
             /*the temporary image object's source is taken from the skins in the json response*/
-            img.src = skinDb.imageFile;
+            image.src = skinDb.imageFile;
             /*when the image loads, the loadCheck function is run*/
-            img.onload = () => loadCheck(skinsDb);
+            image.onload = () => loadCheck(skinsDb);
             /*the skin images array is filled with the skinid, and the image object*/
-            skinImages.push([skinDb.skinid, img]);
+            skinImages.push([skinDb.skinid, image]);
         }
     });
 });
 
 /*this promise works in the same way as the ones which are used to load the images of the monster, stage and player*/
-let createPlayer = new Promise(function(resolve) {
+let loadPlayer = new Promise(function(resolve) {
     fetch('/players/get/' + Cookies.get("token"), {method: 'get'}
     ).then(response => response.json()
         /*this must be called playerDb as to not get confused with the player object that is being used in the game*/
@@ -68,7 +68,7 @@ class Player{
         this.dy = 500;
 
         /*the player's skin is the playerImage object that as declared earlier*/
-        this.image = image;
+        this.image = new Image();
         /*the player starts off as alive, and with 3 lives*/
         this.alive = true;
         this.lives = 3;
@@ -119,13 +119,10 @@ class Player{
 
     }
     setSkin(){
-        for(let x = 0; x < skinImages.length; x++){
+        /*this loops through every skinImage in the skinImages array*/
+        for(let skinImage of skinImages){
             /*if the player's skinid is the same as the one in the array, then the player's image is set to the one in the skins array*/
-            if(this.skinid == skinImages[x][0]){
-                this.image = skinImages[x][1];
-            }
+            if(this.skinid == skinImage[0]) this.image = skinImage[1];
         }
-        /*this loops through every row in the array*/
-
     }
 }

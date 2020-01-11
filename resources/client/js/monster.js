@@ -1,35 +1,13 @@
-/*const monsterImageCount = 1;*/
-const monsterInfo = [];
+/*the monsterImages array is now monster, as it will now store all the information about the monsters from the database*/
+const monstersInfo = [];
 
 /*because there is multiple monsters, the monsters are stored as an array*/
 let monsters = [];
 
-/*let loadMonsterImages = new Promise(function(resolve) {
-
+let loadMonstersInfo = new Promise(function(resolve) {
     let loadedImageCount = 0;
-
-    let loadCheck = function() {
-        loadedImageCount++;
-        if (loadedImageCount === monsterImageCount) {
-            resolve();
-        }
-    };
-
-    for (let i = 1; i <= 2; i++) {
-        let img = new Image();
-        img.src = "/client/img/monster" + i + ".png";
-        img.onload = () => loadCheck();
-        monsterImages.push(img);
-    }
-
-});*/
-
-let loadMonsterInfo = new Promise(function(resolve) {
-    let loadedImageCount = 0;
-    /*the loadCheck takes in the parameter of the skins that are returned in the form of the json response*/
     let loadCheck = function(monstersDb) {
         loadedImageCount++;
-        /*rather than hard coding the amount of images that are meant to load, the length of the json response is used instead*/
         if (loadedImageCount === monstersDb.length) {
             resolve();
         }
@@ -38,22 +16,19 @@ let loadMonsterInfo = new Promise(function(resolve) {
     ).then(response => response.json()
     ).then(monstersDb => {
         for (let monsterDb of monstersDb) {
-            console.log(monsterDb.imageFile);
-            console.log(monsterDb.monsterid);
-            console.log(monsterDb.movementType);
-            console.log(monsterDb.attackType);
-            console.log(monsterDb.stageid);
-            let img = new Image();
-            img.src = monsterDb.imageFile;
+            let image = new Image();
+            image.src = monsterDb.imageFile;
 
-            img.onload = () => loadCheck(monstersDb);
-
-            monsterInfo.push([monsterDb.monsterid, img, monsterDb.movementType, monsterDb.attackType, monsterDb.stageid]);
+            image.onload = () => loadCheck(monstersDb);
+            /*the monsterInfo array is pushed in the same way the skinImages were pushed*/
+            /*this time, all of the attributes from the database apart from the name are pushed instead of just the id and the file name*/
+            monstersInfo.push([monsterDb.monsterid, image, monsterDb.movementType, monsterDb.attackType, monsterDb.stageid]);
         }
     });
 });
 
 class Monster{
+    /*all of the attributes from the database need to be passed into the constructor*/
     constructor(monsterid, image, movementType, attackType, stageid, x){
         this.monsterid = monsterid;
         this.image = image;
