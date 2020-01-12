@@ -16,7 +16,7 @@ class Star{
         /*the starting y coordinate is below the canvas, like the monsters*/
         this.y = ph + this.image.height/2;
         /*the vertical velocity is slightly higher than the monster so that the stars are harder to catch*/
-        this.dy = -350;
+        this.dy = -450;
         /*since the star is technically not living, I have changed the keyword to active, however it will work the same as the alive attribute in the monster and player objects*/
         this.active = true;
         /*the star will give the player score, but will also give them currency, which will calculated later*/

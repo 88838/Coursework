@@ -15,6 +15,7 @@ let loadMonstersInfo = new Promise(function(resolve) {
     fetch('/monsters/list' , {method: 'get'}
     ).then(response => response.json()
     ).then(monstersDb => {
+        if (monstersDb.hasOwnProperty('error')) alert(monstersDb.error);
         for (let monsterDb of monstersDb) {
             let image = new Image();
             image.src = monsterDb.imageFile;

@@ -35,7 +35,7 @@ public class MonstersController {
             }
             return list.toString();
         } catch (Exception exception) {
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to list monsters. Please see server console for more info.\"}";
         }
     }

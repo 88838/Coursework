@@ -339,7 +339,7 @@ public class PlayersController {
 
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to update high score. Please see server console for more info.\"}";
         }
     }
@@ -379,7 +379,7 @@ public class PlayersController {
             psUpdateCurrency.executeUpdate();
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to update currency. Please see server console for more info.\"}";
         }
     }
@@ -584,7 +584,7 @@ public class PlayersController {
 
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to logout. Please see server console for more info.\"}";
         }
     }

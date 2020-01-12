@@ -14,6 +14,7 @@ let loadStagesInfo = new Promise(function(resolve) {
     fetch('/stages/list' , {method: 'get'}
     ).then(response => response.json()
     ).then(stagesDb => {
+        if (stagesDb.hasOwnProperty('error')) alert(stagesDb.error);
         for (let stageDb of stagesDb) {
             let image = new Image();
             image.src = stageDb.imageFile;

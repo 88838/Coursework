@@ -72,7 +72,7 @@ public class KillsController {
 
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to update kill. Please see server console for more info.\"}";
         }
     }

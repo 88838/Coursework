@@ -15,27 +15,27 @@ import java.sql.ResultSet;
 public class DeathsController {
 
     @GET
-    @Path("list")
+    @Path("get/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String deathsList(){
-        System.out.println("deaths/list");
+    public String deathsGet(@PathParam("token") String token) {
+        System.out.println("deaths/get");
         JSONArray list = new JSONArray();
         try{
-            PreparedStatement psGetDeaths = Main.db.prepareStatement("SELECT playrid, livesLeft, deathLocationX, deathLocationY, stageid  FROM Deaths");
-
+            int playerid = Controllers.PlayersController.identifyPlayer(token);
+            PreparedStatement psGetDeaths = Main.db.prepareStatement("SELECT livesLeft, deathLocationX, deathLocationY, stageid  FROM Deaths WHERE playerid = ?");
+            psGetDeaths.setInt(1, playerid);
             ResultSet deathsResults = psGetDeaths.executeQuery();
             while (deathsResults.next()) {
                 JSONObject item = new JSONObject();
-                item.put("playerid", deathsResults.getInt(1));
-                item.put("livesLeft", deathsResults.getInt(2));
-                item.put("deathLocationX", deathsResults.getInt(3));
-                item.put("deathLocationY", deathsResults.getInt(4));
-                item.put("stageid", deathsResults.getInt(5));
+                item.put("livesLeft", deathsResults.getInt(1));
+                item.put("deathLocationX", deathsResults.getInt(2));
+                item.put("deathLocationY", deathsResults.getInt(3));
+                item.put("stageid", deathsResults.getInt(4));
                 list.add(item);
             }
             return list.toString();
         } catch (Exception exception) {
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to list deaths. Please see server console for more info.\"}";
         }
     }
@@ -46,7 +46,7 @@ public class DeathsController {
     @Produces(MediaType.APPLICATION_JSON)
     public String deathsUpdate(
             @CookieParam("token") String token, @FormDataParam("livesLeft") String livesLeftTemp, @FormDataParam("deathLocationX") String deathLocationXTemp, @FormDataParam("deathLocationY") String deathLocationYTemp, @FormDataParam("stageid") String stageidTemp) {
-        System.out.println("kills/update");
+        System.out.println("deaths/update");
         try {
             if(token == null || livesLeftTemp == null || deathLocationXTemp == null || deathLocationYTemp == null || stageidTemp == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
@@ -92,7 +92,7 @@ public class DeathsController {
 
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
-            System.out.println("Database error code: " + exception.getMessage());
+            System.out.println("Database error: " + exception.getMessage());
             return "{\"error\": \"Unable to update death. Please see server console for more info.\"}";
         }
     }

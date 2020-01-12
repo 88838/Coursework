@@ -17,6 +17,7 @@ let loadSkinImages = new Promise(function(resolve) {
     fetch('/skins/list' , {method: 'get'}
     ).then(response => response.json()
     ).then(skinsDb => {
+        if (skinsDb.hasOwnProperty('error')) alert(skinsDb.error);
         for (let skinDb of skinsDb) {
 /*            console.log(skinDb.imageFile);
             console.log(skinDb.skinid);*/
@@ -37,6 +38,7 @@ let loadPlayer = new Promise(function(resolve) {
     ).then(response => response.json()
         /*this must be called playerDb as to not get confused with the player object that is being used in the game*/
     ).then(playerDb => {
+        if (playerDb.hasOwnProperty('error')) alert(responseData.error);
         /*the player is created using the parameters of the playerid and skinid from the database*/
 
         player = new Player(playerDb.playerid, playerDb.skinid);
@@ -56,14 +58,14 @@ class Player{
 
         /*the player's x and y coordinates are in the middle of the playable area*/
         this.x = pw/2;
-        this.y = ph/2;
+        this.y = ph/4;
         /*the artificialY will start off as 0*/
         /*though the player isn't technically at the y coordinate of 0, this will be the starting point of every game they start*/
         this.artificialY = 0;
 
         /*dx is the horizontal velocity of the player and starts off as 0 because the player is not moving left and right when the game loads*/
         this.dx = 0;
-        this.dy = 500;
+        this.dy = 350;
 
         /*the player's skin is the playerImage object that as declared earlier*/
         this.image = new Image();

@@ -24,11 +24,24 @@ function spawnMonster(){
 
 function spawnProjectile(){
     for(let monster of monsters){
+        /*if the current monster has an attackType of projectile, then the projectile is pushed in the middle of the monster, and it looks like they're shooting*/
         if(monster.attackType==="projectile"){
             projectiles.push(new Projectile(monster.x, monster.y))
-            console.log("x: " + monster.x + ", y: " + monster.y)
         }
     }
+}
+
+let deathsInfo = [];
+function getDeaths(){
+    fetch('/deaths/get/' + Cookies.get("token") , {method: 'get'}
+    ).then(response => response.json()
+    ).then(deathsDb => {
+        if (deathsDb.hasOwnProperty('error')) alert(deathsDb.error);
+        for (let deathDb of deathsDb) {
+            deathsInfo.push(deathDb.livesLeft, deathDb.deathLocationX, deathDb.deathLocationY)
+/*            deaths.push(new Death(deathDb.livesLeft, deathDb.deathLocationX, deathDb.deathLocationY))*/
+        }
+    });
 }
 
 function pageLoad(){
@@ -46,13 +59,17 @@ function pageLoad(){
                     loadPlayer.then(() => {
                         player.setSkin();
                         stage = new Stage(stagesInfo[0][0], stagesInfo[0][1]);
+                        getDeaths();
+                        for (let deathInfo of deathsInfo){
+                            deaths.push(new Death(deathInfo[0], deathInfo[1], deathInfo[2]));
+                        }
 
 
                         /*if the player is alive, a new monster is pushed every 450 milliseconds*/
                         setInterval(() => {
                             if (player.alive) spawnMonster()
                         }, 350);
-
+                        /*every 750 milliseconds, every monster that can, shoots*/
                         setInterval(() => {
                             if (player.alive) spawnProjectile()
                         }, 750);
@@ -136,25 +153,51 @@ function separation(entity1, entity2) {
         + Math.pow(entity1.y - entity2.y, 2));
 }
 
+function saveDeath(){
+    /*because there isn't a physical form to be taken from the page, a FormData object must be made*/
+    /*the cookie doesn't need to be in the formData because it is sent by default*/
+    let formData = new FormData();
+    /*a formData parameter must be string, so all the values must be converted to strings*/
+    formData.append("livesLeft", (player.lives).toString());
+    /*the x locations must be rounded, otherwise the api will not be able to parse it to an integer because it will be a double*/
+    formData.append("deathLocationX", (Math.round(player.x)).toString());
+    formData.append("deathLocationY", (Math.round(player.artificialY)).toString());
+    formData.append("stageid", stage.stageid.toString());
 
+    fetch('/deaths/update/', {method: 'post', body: formData}
+    ).then(response => response.json()
+    ).then(responseData => {
+        /*to add extra validation, an alert will display if there is an error*/
+        if (responseData.hasOwnProperty('error')) alert(responseData.error);
+    });
+}
 
-function playerRespawn(){
+function playerDeath(){
+    getDeaths();
+    console.log("player x: " + player.x + ", player.y: " + player.artificialY)
     /*all the monsters are killed*/
     for (let monster of monsters) monster.alive = false;
     for (let star of stars) star.active = false;
     for (let projectile of projectiles) projectile.active = false;
-    /*the player's x coordinate is reset back to the middle, and their velocity is reset to 0*/
-    stage.y = ph/2;
-    /*the player's artificialY needs to be reset to whichever stage they reached, each time they respawn*/
-    /*instead of checking each id of the stage and manually setting the player's artificial y coordinate, it is instead taken from the information provided by the database*/
-    for(let stageInfo of stagesInfo){
-        if(stage.stageid == stageInfo[0]) player.artificialY = stageInfo[2];
+    for (let death of deaths) death.active = false;
+    player.lives -= 1;
+    console.log("player lives left: " + player.lives);
+    /*saveDeath must be called after the player lives have decreased because the attribute in the database is livesLeft rather than lives*/
+    saveDeath();
+    /*because this is after lives have decreased, it now has to be zero for the player to be fully dead*/
+    if (player.lives === 0){
+        player.alive = false;
+    }else {
+        /*the player's x coordinate is reset back to the middle, and their velocity is reset to 0*/
+        stage.y = ph / 2;
+        /*the player's artificialY needs to be reset to whichever stage they reached, each time they respawn*/
+        /*instead of checking each id of the stage and manually setting the player's artificial y coordinate, it is instead taken from the information provided by the database*/
+        for (let stageInfo of stagesInfo) {
+            if (stage.stageid == stageInfo[0]) player.artificialY = stageInfo[2];
+        }
+        player.x = pw / 2;
+        player.dx = 0;
     }
-
-    player.x = pw/2;
-    player.dx = 0;
-    /*the player loses a life*/
-    player.lives -=1;
 }
 
 function monsterDeath(monster){
@@ -163,6 +206,8 @@ function monsterDeath(monster){
     player.score += monster.value*stage.id;
     monster.alive = false;
 }
+
+
 
 function starCollect(star){
     /*the player's score is increased by 500 (the star's value)*/
@@ -175,8 +220,7 @@ function starCollect(star){
 
 function processes(frameLength){
 
-
-    if(player.lives === 0) player.alive = false;
+/*    if(player.lives === 0) player.alive = false;*/
 
     /*the setImage method is used instead of manually checking the stageid*/
     stage.setImage();
@@ -197,13 +241,15 @@ function processes(frameLength){
     }
     for (let projectile of projectiles){
         projectile.update(frameLength);
+        if( projectile.y < -10) projectile.active = false;
+
+        /*the player has a height of 64, so their radius is 32*/
+        /*the projectile has a height of 10 so its radius is 5*/
+        /*the total distance for them to be touching is 37, but since I have given the monster collision detection a leniency of 5 pixels, then the total distance is 32*/
+        /*therefore, the separation needs to only be 32 - half the player's height*/
         if (separation(projectile, player) < player.image.height/2) {
             projectile.active = false;
-            if (player.lives === 1){
-                player.alive = false;
-            }else{
-                playerRespawn();
-            }
+            playerDeath();
         }
         if (!player.alive) projectile.active = false;
     }
@@ -213,9 +259,7 @@ function processes(frameLength){
         monster.update(frameLength);
 
         /*if the monster's y coordinate is higher than -64 (the monster's height), then the monster is no longer alive*/
-        if( monster.y < -(monster.image.height)){
-            monster.alive = false;
-        }
+        if( monster.y < -(monster.image.height)) monster.alive = false;
 
         /*the player must be above the monster to be able to attack them*/
         if(player.y < monster.y){
@@ -227,14 +271,7 @@ function processes(frameLength){
 
         /*if the distance between the current monster and the player is smaller than the height of the monster-2 then the resolveCollision function is run*/
         /*the reason why 5 is taken away, is so that a tiny bit of overlap is allowed, before it is registered as a collision*/
-/*        if (separation(monster, player) < monster.image.height-5) {
-            /!*if the player has 1 life left then they die the next time they get it, otherwise they respawn*!/
-            if (player.lives === 1){
-                player.alive = false;
-            }else{
-                playerRespawn();
-            }
-        }*/
+        if (separation(monster, player) < monster.image.height-5) playerDeath();
 
         /*if the player is not alive then the monster is also not alive*/
         if (!player.alive) monster.alive = false;
@@ -250,15 +287,25 @@ function processes(frameLength){
 
     for (let star of stars){
         star.update(frameLength);
+        if( star.y < -(star.image.height)) star.active = false;
         /*this is very similar to the collision detection between the player and the monster, with 5 pixels of overlap*/
         if (separation(star, player) < star.image.height-5) starCollect(star);
         /*if the star moves off the screen, or if the player is dead, then it is no longer active, similar to the monsters*/
-        if( star.y < -(star.image.height)) star.active = false;
         if(!player.alive) star.active = false;
     }
     /*all the stars that are no longer active will be filtered out of the stars array*/
     stars = stars.filter(s => s.active);
+
+    for(let death of deaths){
+        death.update(frameLength);
+        death.setInfo();
+        if (!player.alive) death.active = false;
+        if( death.y < -20) death.active = false;
+    }
+    deaths = deaths.filter(d => d.active);
 }
+
+/*this will change each time the player dies, so it needs to be a variable not a constant*/
 
 /*the playable area is an offscreen canvas, and is rendered offscreen using the pre-defined width and height*/
 const playableArea = new OffscreenCanvas(pw, ph);
@@ -284,6 +331,11 @@ function outputs(){
         star.draw(pac);
     }
 
+    for(let death of deaths){
+        death.draw(pac);
+    }
+
+
 
     /*the game canvas is 'gc'*/
     const gameCanvas = document.getElementById('gameCanvas');
@@ -298,5 +350,10 @@ function outputs(){
     /*dx and dy are the x and y coordinates in the destination canvas at which to place the top-left corner of the source image*/
     /*half of the width and height of the playable area is taken away from half the width and the height of the game canvas to work out the dx and dy*/
     gc.drawImage(playableArea,gw/2 - pw/2, gh/2 - ph/2);
+
+    gc.font = "20px squarewave-bold";
+    gc.fillStyle = "white";
+/*    gc.textAlign = "center";*/
+    gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, 20);
 
 }
