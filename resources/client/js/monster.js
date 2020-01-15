@@ -46,7 +46,7 @@ class Monster{
 
         this.alive = true;
         /*this is the value of the monster, and if the player kills the monster then they will gain this amount of score*/
-        this.value = this.monsterid*100;
+        this.value = (parseInt(this.monsterid))*100;
 
     }
 

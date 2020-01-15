@@ -42,7 +42,7 @@ public class KillsController {
             //if the player hasn't killed the monster, then a new kill is created, using the MonsterID from the form data parameters
             if(exists==0){
                 //this is the first instance of the kill, so the session kill don't need to be added to anything and can be used as the number of kills
-                PreparedStatement psNewKill = Main.db.prepareStatement("INSERT INTO Kills (playerid, mosterid, numberOfKills) VALUES (?,?,?)");
+                PreparedStatement psNewKill = Main.db.prepareStatement("INSERT INTO Kills (playerid, monsterid, numberOfKills) VALUES (?,?,?)");
                 psNewKill.setInt(1, playerid);
                 psNewKill.setInt(2, monsterid);
                 psNewKill.setInt(3, sessionKills);

@@ -31,15 +31,14 @@ function spawnProjectile(){
     }
 }
 
-let deathsInfo = [];
 function getDeaths(){
     fetch('/deaths/get/' + Cookies.get("token") , {method: 'get'}
     ).then(response => response.json()
     ).then(deathsDb => {
         if (deathsDb.hasOwnProperty('error')) alert(deathsDb.error);
         for (let deathDb of deathsDb) {
-            deathsInfo.push(deathDb.livesLeft, deathDb.deathLocationX, deathDb.deathLocationY)
-/*            deaths.push(new Death(deathDb.livesLeft, deathDb.deathLocationX, deathDb.deathLocationY))*/
+            /*all three deaths of the player are fetched and pushed*/
+            deaths.push(new Death(deathDb.livesLeft, deathDb.deathLocationX, deathDb.deathLocationY))
         }
     });
 }
@@ -59,11 +58,8 @@ function pageLoad(){
                     loadPlayer.then(() => {
                         player.setSkin();
                         stage = new Stage(stagesInfo[0][0], stagesInfo[0][1]);
+                        /*the deaths need to be pushed for the first time when the page first loads*/
                         getDeaths();
-                        for (let deathInfo of deathsInfo){
-                            deaths.push(new Death(deathInfo[0], deathInfo[1], deathInfo[2]));
-                        }
-
 
                         /*if the player is alive, a new monster is pushed every 450 milliseconds*/
                         setInterval(() => {
@@ -173,7 +169,6 @@ function saveDeath(){
 }
 
 function playerDeath(){
-    getDeaths();
     console.log("player x: " + player.x + ", player.y: " + player.artificialY)
     /*all the monsters are killed*/
     for (let monster of monsters) monster.alive = false;
@@ -182,8 +177,12 @@ function playerDeath(){
     for (let death of deaths) death.active = false;
     player.lives -= 1;
     console.log("player lives left: " + player.lives);
+    saveKills();
+    kills = [];
     /*saveDeath must be called after the player lives have decreased because the attribute in the database is livesLeft rather than lives*/
     saveDeath();
+    /*getDeaths must be called after the last death is saved, so that it is displayed*/
+    getDeaths();
     /*because this is after lives have decreased, it now has to be zero for the player to be fully dead*/
     if (player.lives === 0){
         player.alive = false;
@@ -200,14 +199,40 @@ function playerDeath(){
     }
 }
 
-function monsterDeath(monster){
-    /*the player's score is increased by the monster's value multiplied by the current stage they are on*/
-    /*i.e. if the player kills a monster with a value of 200 on stage 2, they would gain 400 score*/
-    player.score += monster.value*stage.id;
-    monster.alive = false;
+function saveKills(){
+    for(let kill of kills){
+        let formData = new FormData();
+        /*the x locations must be rounded, otherwise the api will not be able to parse it to an integer because it will be a double*/
+        formData.append("monsterid", kill.monsterid.toString());
+        formData.append("sessionKills", kill.sessionKills.toString());
+
+        fetch('/kills/update/', {method: 'post', body: formData}
+        ).then(response => response.json()
+        ).then(responseData => {
+            /*to add extra validation, an alert will display if there is an error*/
+            if (responseData.hasOwnProperty('error')) alert(responseData.error);
+        });
+    }
 }
 
-
+function monsterDeath(monster){
+    let killExists = false;
+    for (let kill of kills){
+        if(kill.monsterid === monster.monsterid){
+            killExists = true;
+            console.log("updated kill");
+            kill.sessionKills ++;
+        }
+    }
+    if(killExists === false) {
+        console.log("new kill");
+        kills.push(new Kill(monster.monsterid))
+    }
+    /*the player's score is increased by the monster's value multiplied by the current stage they are on*/
+    /*i.e. if the player kills a monster with a value of 200 on stage 2, they would gain 400 score*/
+    player.score += monster.value;
+    monster.alive = false;
+}
 
 function starCollect(star){
     /*the player's score is increased by 500 (the star's value)*/
@@ -219,9 +244,6 @@ function starCollect(star){
 }
 
 function processes(frameLength){
-
-/*    if(player.lives === 0) player.alive = false;*/
-
     /*the setImage method is used instead of manually checking the stageid*/
     stage.setImage();
     /*the player is given a very short amount of time, between when the timer is 1 and 0.75 (equating to around 15 frames) where they are attacking and can kill an enemy*/
@@ -256,10 +278,17 @@ function processes(frameLength){
     projectiles = projectiles.filter(p => p.active);
 
     for( let monster of monsters){
+        console.log(monster.value);
         monster.update(frameLength);
 
         /*if the monster's y coordinate is higher than -64 (the monster's height), then the monster is no longer alive*/
         if( monster.y < -(monster.image.height)) monster.alive = false;
+
+
+
+        /*if the distance between the current monster and the player is smaller than the height of the monster-2 then the resolveCollision function is run*/
+        /*the reason why 5 is taken away, is so that a tiny bit of overlap is allowed, before it is registered as a collision*/
+        if (separation(monster, player) < monster.image.height-5) playerDeath();
 
         /*the player must be above the monster to be able to attack them*/
         if(player.y < monster.y){
@@ -268,10 +297,6 @@ function processes(frameLength){
             if((separation(monster, player) < monster.image.height+5) && player.attacking === true) monsterDeath(monster);
 
         }
-
-        /*if the distance between the current monster and the player is smaller than the height of the monster-2 then the resolveCollision function is run*/
-        /*the reason why 5 is taken away, is so that a tiny bit of overlap is allowed, before it is registered as a collision*/
-        if (separation(monster, player) < monster.image.height-5) playerDeath();
 
         /*if the player is not alive then the monster is also not alive*/
         if (!player.alive) monster.alive = false;
@@ -298,8 +323,8 @@ function processes(frameLength){
 
     for(let death of deaths){
         death.update(frameLength);
-        death.setInfo();
         if (!player.alive) death.active = false;
+        /*if the death goes of the screen, it is no longer active*/
         if( death.y < -20) death.active = false;
     }
     deaths = deaths.filter(d => d.active);
@@ -335,8 +360,6 @@ function outputs(){
         death.draw(pac);
     }
 
-
-
     /*the game canvas is 'gc'*/
     const gameCanvas = document.getElementById('gameCanvas');
     const gc = gameCanvas.getContext('2d');
@@ -355,5 +378,6 @@ function outputs(){
     gc.fillStyle = "white";
 /*    gc.textAlign = "center";*/
     gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, 20);
+    gc.fillText("score: " + player.score, 20, 50);
 
 }
