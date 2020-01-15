@@ -40,8 +40,7 @@ let loadPlayer = new Promise(function(resolve) {
     ).then(playerDb => {
         if (playerDb.hasOwnProperty('error')) alert(responseData.error);
         /*the player is created using the parameters of the playerid and skinid from the database*/
-
-        player = new Player(playerDb.playerid, playerDb.skinid);
+        player = new Player(playerDb.playerid, playerDb.skinid, playerDb.highScore);
         /*the player's skin must be loaded before the promise can be resolved*/
         resolve();
     });
@@ -51,10 +50,11 @@ let loadPlayer = new Promise(function(resolve) {
 
 class Player{
     /*a constructor creates the player object*/
-    constructor(playerid, skinid){
+    constructor(playerid, skinid, highScore){
         /*these two attributes will be using the values from the database*/
         this.playerid = playerid;
         this.skinid = skinid;
+        this.highScore = highScore;
 
         /*the player's x and y coordinates are in the middle of the playable area*/
         this.x = pw/2;

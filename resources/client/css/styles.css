@@ -89,15 +89,24 @@ body {
     padding-right: 50px;
 }
 #killHeadingsRow{
-    font-size: 30pt;
+    font-size: 35pt;
 }
 .killHeadings{
     padding-left: 10px;
     padding-right: 10px;
 }
-
+/*----------------*/
 td{
-    font-size: 20pt;
+    font-size: 25pt;
     padding-top: 10px;
+}
+#leaderboardDiv{
+
+    margin-top: 13%;
+}
+
+.playerDataRow{
+    color : #c0006f;
+    font-size: 35pt;
 }
 

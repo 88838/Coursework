@@ -51,7 +51,7 @@ function pageLoad(){
     window.addEventListener("keyup", event => pressedKeys[event.key] = false);
 
     /*only once has loaded, is the first frame requested*/
-    loadStagesInfo .then(() =>{
+    loadStagesInfo.then(() =>{
         loadSkinImages.then(() => {
             loadMonstersInfo.then(() => {
                 loadStarImage.then(() => {
@@ -169,16 +169,17 @@ function saveDeath(){
 }
 
 function playerDeath(){
-    console.log("player x: " + player.x + ", player.y: " + player.artificialY)
     /*all the monsters are killed*/
     for (let monster of monsters) monster.alive = false;
     for (let star of stars) star.active = false;
     for (let projectile of projectiles) projectile.active = false;
     for (let death of deaths) death.active = false;
     player.lives -= 1;
-    console.log("player lives left: " + player.lives);
+    /*the kills are saved to the database after the player dies*/
     saveKills();
+    /*the kills array is emptied, as each life is a 'session'*/
     kills = [];
+
     /*saveDeath must be called after the player lives have decreased because the attribute in the database is livesLeft rather than lives*/
     saveDeath();
     /*getDeaths must be called after the last death is saved, so that it is displayed*/
@@ -186,6 +187,8 @@ function playerDeath(){
     /*because this is after lives have decreased, it now has to be zero for the player to be fully dead*/
     if (player.lives === 0){
         player.alive = false;
+        /*this has do be done after the player has died so that the score doesn't keep updating every 100 ms*/
+        if(player.score>player.highScore) saveHighScore();
     }else {
         /*the player's x coordinate is reset back to the middle, and their velocity is reset to 0*/
         stage.y = ph / 2;
@@ -202,30 +205,31 @@ function playerDeath(){
 function saveKills(){
     for(let kill of kills){
         let formData = new FormData();
-        /*the x locations must be rounded, otherwise the api will not be able to parse it to an integer because it will be a double*/
+        /*the form data is filled with the monsterid and the sessionkills*/
         formData.append("monsterid", kill.monsterid.toString());
         formData.append("sessionKills", kill.sessionKills.toString());
 
         fetch('/kills/update/', {method: 'post', body: formData}
         ).then(response => response.json()
         ).then(responseData => {
-            /*to add extra validation, an alert will display if there is an error*/
             if (responseData.hasOwnProperty('error')) alert(responseData.error);
         });
     }
 }
 
 function monsterDeath(monster){
+    /*the this boolean variable will turn true if the kill exists*/
     let killExists = false;
     for (let kill of kills){
+        /*if one of the kills already has one of the ids of the monster, then it exists*/
         if(kill.monsterid === monster.monsterid){
             killExists = true;
-            console.log("updated kill");
+            /*the session kills for that specific monster is incremented*/
             kill.sessionKills ++;
         }
     }
+    /*if the kill doesn't exist yet, then a new kill is pushed*/
     if(killExists === false) {
-        console.log("new kill");
         kills.push(new Kill(monster.monsterid))
     }
     /*the player's score is increased by the monster's value multiplied by the current stage they are on*/
@@ -233,7 +237,17 @@ function monsterDeath(monster){
     player.score += monster.value;
     monster.alive = false;
 }
+function saveHighScore(){
+    let formData = new FormData();
+    formData.append("newHighScore", (player.score).toString());
 
+    fetch('/players/updateHighScore/', {method: 'post', body: formData}
+    ).then(response => response.json()
+    ).then(responseData => {
+        /*to add extra validation, an alert will display if there is an error*/
+        if (responseData.hasOwnProperty('error')) alert(responseData.error);
+    });
+}
 function starCollect(star){
     /*the player's score is increased by 500 (the star's value)*/
     player.score += star.value;
@@ -278,7 +292,6 @@ function processes(frameLength){
     projectiles = projectiles.filter(p => p.active);
 
     for( let monster of monsters){
-        console.log(monster.value);
         monster.update(frameLength);
 
         /*if the monster's y coordinate is higher than -64 (the monster's height), then the monster is no longer alive*/
@@ -336,6 +349,7 @@ function processes(frameLength){
 const playableArea = new OffscreenCanvas(pw, ph);
 
 function outputs(){
+    console.log(player.highScore);
     /*the context for the playable area is set as a constant called 'pac' (playable area canvas)*/
     const pac = playableArea.getContext('2d');
     /*to check the canvas is working, I have filled the playable area with red*/
@@ -379,5 +393,6 @@ function outputs(){
 /*    gc.textAlign = "center";*/
     gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, 20);
     gc.fillText("score: " + player.score, 20, 50);
+    gc.fillText("high score: " + player.highScore, 20, 70);
 
 }

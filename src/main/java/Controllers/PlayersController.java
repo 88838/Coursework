@@ -134,7 +134,7 @@ public class PlayersController {
                 throw new Exception("Token is missing in the HTTP request");
             }
             int playerid = identifyPlayer(token);
-            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT skinid FROM Players WHERE playerid = ?");
+            PreparedStatement psPlayerInfo = Main.db.prepareStatement("SELECT skinid, highScore FROM Players WHERE playerid = ?");
             psPlayerInfo.setInt(1, playerid);
             ResultSet playerInfoResults = psPlayerInfo.executeQuery();
 
@@ -142,6 +142,7 @@ public class PlayersController {
             if (playerInfoResults.next()) {
                 item.put("playerid", playerid);
                 item.put("skinid", playerInfoResults.getString(1));
+                item.put("highScore", playerInfoResults.getString(2));
             }
             return item.toString();
         } catch (Exception exception) {
