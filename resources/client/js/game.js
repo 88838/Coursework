@@ -44,6 +44,12 @@ function getDeaths(){
 }
 
 function pageLoad(){
+    checkToken(
+        /*success and fail are defined using arrow notation when checkToken is called.*/
+        () => {},
+        () => {window.location.href = "/client/login.html";}
+    );
+
     document.getElementById("mainMenuOption").addEventListener("click", ()=> window.location.href = "/client/index.html");
     /*if the key is pressed, it is set to true for that key*/
     /*once the key has been let go, it is set as false*/
@@ -57,6 +63,8 @@ function pageLoad(){
                 loadStarImage.then(() => {
                     loadPlayer.then(() => {
                         player.setSkin();
+                        let music = new Music( "/client/img/interstellar.mp3");
+                        music.play();
                         stage = new Stage(stagesInfo[0][0], stagesInfo[0][1]);
                         /*the deaths need to be pushed for the first time when the page first loads*/
                         getDeaths();
@@ -113,13 +121,14 @@ function gameFrame(timestamp) {
 function inputs(frameLength){
     /*the player has to be alive for the inputs to be processed*/
     if (player.alive){
-        /*if the "a" is true (has been pressed)*/
-        if(pressedKeys["a"]){
+        /*"a" or "A" will be true if they have been pressed*/
+        /*the capital "A" is needed so that the player can still play even if they have accidentally pressed caps lock, which increases useability*/
+        if(pressedKeys["a"]||pressedKeys["A"]){
             /*the player accelerates at a certain rate*/
             player.dx -= 10000*frameLength;
             /*the player's max velocity is 600 and -600*/
             if (player.dx < -700) player.dx = -700;
-        }else if(pressedKeys["d"]){
+        }else if(pressedKeys["d"]||pressedKeys["D"]){
             player.dx += 10000*frameLength;
             if (player.dx > 700) player.dx = 700;
         } else{
@@ -384,7 +393,7 @@ const playableArea = new OffscreenCanvas(pw, ph);
 function outputs(){
     /*the context for the playable area is set as a constant called 'pac' (playable area canvas)*/
     const pac = playableArea.getContext('2d');
-    /*to check the canvas is working, I have filled the playable area with red*/
+    /*I have finally changed the base colour of the playable area to be the same hot pink used throughout the rest of the website*/
     pac.fillStyle = "#c0006f";
     pac.fillRect(0,0, pw, ph);
 
@@ -406,18 +415,30 @@ function outputs(){
         death.draw(pac);
     }
 
-    if(!player.alive){
+    /*the player's artificial Y will only be exactly 0 when they first load in, and for a frame when they respawn or die, however the latter will not affect the screen because it is so miniscule of a time frame*/
+    if(!player.alive && player.artificialY === 0){
         /*the text will be white*/
         pac.fillStyle = "white";
         /*the text must be aligned to the center just like in css, otherwise it will be drawn from the top left*/
         pac.textAlign = "center";
         /*the game over part will be 100 pixels big to make it it clear to the player*/
         pac.font = "100px squarewave-bold";
-        /*the game over text is 2/5 of the way down, and the instructions are 3/5 of the way down to make them look aligned to the middle of the playable area*/
-        pac.fillText("GAME OVER", pw/2, 2*ph/5);
+        pac.font = "50px squarewave-bold";
+        pac.fillText("A and D: move", pw/2, ph/2-50);
+        pac.fillText("SPACE: attack", pw/2, ph/2-10);
+        /*the instructions for the player to restart will be below the game over text, in a smaller font*/
+        pac.fillText("press ENTER to start", pw/2, ph/2+50);
+    }else if(!player.alive){
+        /*the text will be white*/
+        pac.fillStyle = "white";
+        /*the text must be aligned to the center just like in css, otherwise it will be drawn from the top left*/
+        pac.textAlign = "center";
+        /*the game over part will be 100 pixels big to make it it clear to the player*/
+        pac.font = "100px squarewave-bold";
+        pac.fillText("GAME OVER", pw/2, ph/2-20);
         /*the instructions for the player to restart will be below the game over text, in a smaller font*/
         pac.font = "50px squarewave-bold";
-        pac.fillText("press ENTER to restart", pw/2, 3*ph/5);
+        pac.fillText("press ENTER to restart", pw/2, ph/2+50);
     }
     /*the game canvas is 'gc'*/
     const gameCanvas = document.getElementById('gameCanvas');
@@ -433,14 +454,21 @@ function outputs(){
     /*half of the width and height of the playable area is taken away from half the width and the height of the game canvas to work out the dx and dy*/
     gc.drawImage(playableArea,gw/2 - pw/2, gh/2 - ph/2);
 
-
+    if(player.artificialY !=0){
     gc.fillStyle = "white";
-    gc.font = "30px squarewave-bold";
-/*    gc.textAlign = "center";*/
-    gc.fillText("score: " + player.score, 20, 30);
-    gc.fillText("high score: " + player.highScore, 20, 50)
+    gc.font = "35px squarewave-bold";
+    /*the score and high score are in top left corner*/
+    /*the y offset is larger than the x offset because font size of the number being displayed is larger than the size of the characters so it needs to be accounted for*/
+        gc.fillText("high score: " + player.highScore, 20, 30)
+        gc.fillText("score: " + player.score, 20, 60);
+    /*the x offset is the width of the whole game - the playable area, which gets you to the right edge of the playable area +20 so it's the same as the left side*/
     gc.fillText("currency: " + player.cumCurrency, gw-pw/2+20, 30);
-    gc.font = "30px squarewave-bold";
+    gc.fillText("lives: " + player.lives, gw-pw/2+20, 60);
+/*    gc.fillText("A and D to move", gw-pw/2+20, gh-50);
+    gc.fillText("SPACE to attack", gw-pw/2+20, gh-20);*/
+    /*the player x and y need to be rounded so that they are not insanely large decimal numbers on the screen*/
+    /*this text is in the bottom left corner*/
     gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, gh-20);
+    }
 
 }

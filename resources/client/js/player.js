@@ -70,7 +70,7 @@ class Player{
         /*the player's skin is the playerImage object that as declared earlier*/
         this.image = new Image();
         /*the player starts off as alive, and with 3 lives*/
-        this.alive = true;
+        this.alive = false;
         this.lives = 3;
         /*this starts off as false, because the player is not attacking when they spawn in*/
         this.attacking = false;
