@@ -78,6 +78,7 @@ class Player{
         this.score = 0;
         /*the player's currency is 0 because it's the session currency*/
         this.currency = 0;
+        this.cumCurrency = 0;
 
         /*if the cooldown is false, then there is no cooldown and the player can attack*/
         this.cooldown = false;

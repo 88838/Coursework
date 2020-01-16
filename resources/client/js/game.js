@@ -140,6 +140,16 @@ function inputs(frameLength){
             player.attacking = false;
         }
     }
+    /*if the player is dead, and the player presses the enter key, then most of the player attributes are reset*/
+    /*this includes the lives, and the alive attribute, which then allows the stage to be drawn, and all of the monsters and stars to be pushed, along with the score being increased again*/
+    if(!player.alive && pressedKeys["Enter"]){
+        player.lives = 3;
+        player.cumCurrency = 0;
+        player.score = 0;
+        player.artificialY = 0;
+        player.x = pw/2;
+        player.alive = true;
+    }
 }
 
 function separation(entity1, entity2) {
@@ -184,11 +194,15 @@ function playerDeath(){
     saveDeath();
     /*getDeaths must be called after the last death is saved, so that it is displayed*/
     getDeaths();
+    /*the currency is saved, and the currency is reset to 0*/
+    saveCurrency();
+    player.currency=0;
     /*because this is after lives have decreased, it now has to be zero for the player to be fully dead*/
     if (player.lives === 0){
         player.alive = false;
         /*this has do be done after the player has died so that the score doesn't keep updating every 100 ms*/
-        if(player.score>player.highScore) saveHighScore();
+        saveHighScore();
+
     }else {
         /*the player's x coordinate is reset back to the middle, and their velocity is reset to 0*/
         stage.y = ph / 2;
@@ -239,7 +253,7 @@ function monsterDeath(monster){
 }
 function saveHighScore(){
     let formData = new FormData();
-    formData.append("newHighScore", (player.score).toString());
+    formData.append("newHighScore", (player.highScore).toString());
 
     fetch('/players/updateHighScore/', {method: 'post', body: formData}
     ).then(response => response.json()
@@ -253,11 +267,29 @@ function starCollect(star){
     player.score += star.value;
     /*the player's currency is increased by 5 (0.01*500)*/
     player.currency += star.value*0.01;
+    /*the cumulative currency goes up the same amount as the currency*/
+    player.cumCurrency += star.value*0.01;
     /*if the player collects the star it is no longer active, and will disappear*/
     star.active = false;
 }
+/*this works pretty much the same as the other save functions*/
+function saveCurrency(){
+    let formData = new FormData();
+    formData.append("sessionCurrency", (player.currency).toString());
 
+    fetch('/players/updateCurrency/', {method: 'post', body: formData}
+    ).then(response => response.json()
+    ).then(responseData => {
+        /*to add extra validation, an alert will display if there is an error*/
+        if (responseData.hasOwnProperty('error')) alert(responseData.error);
+    });
+}
 function processes(frameLength){
+    /*if the player's score is larger than the high score, then the high score will become the player's score*/
+    /*because processes is run many times per second, to the player it will look like they are updating at the same time*/
+    if(player.highScore === null) player.highScore = 0;
+    if(player.score> player.highScore) player.highScore = player.score;
+
     /*the setImage method is used instead of manually checking the stageid*/
     stage.setImage();
     /*the player is given a very short amount of time, between when the timer is 1 and 0.75 (equating to around 15 frames) where they are attacking and can kill an enemy*/
@@ -341,6 +373,7 @@ function processes(frameLength){
         if( death.y < -20) death.active = false;
     }
     deaths = deaths.filter(d => d.active);
+
 }
 
 /*this will change each time the player dies, so it needs to be a variable not a constant*/
@@ -349,11 +382,10 @@ function processes(frameLength){
 const playableArea = new OffscreenCanvas(pw, ph);
 
 function outputs(){
-    console.log(player.highScore);
     /*the context for the playable area is set as a constant called 'pac' (playable area canvas)*/
     const pac = playableArea.getContext('2d');
     /*to check the canvas is working, I have filled the playable area with red*/
-    pac.fillStyle = "blue";
+    pac.fillStyle = "#c0006f";
     pac.fillRect(0,0, pw, ph);
 
     stage.draw(pac);
@@ -374,6 +406,19 @@ function outputs(){
         death.draw(pac);
     }
 
+    if(!player.alive){
+        /*the text will be white*/
+        pac.fillStyle = "white";
+        /*the text must be aligned to the center just like in css, otherwise it will be drawn from the top left*/
+        pac.textAlign = "center";
+        /*the game over part will be 100 pixels big to make it it clear to the player*/
+        pac.font = "100px squarewave-bold";
+        /*the game over text is 2/5 of the way down, and the instructions are 3/5 of the way down to make them look aligned to the middle of the playable area*/
+        pac.fillText("GAME OVER", pw/2, 2*ph/5);
+        /*the instructions for the player to restart will be below the game over text, in a smaller font*/
+        pac.font = "50px squarewave-bold";
+        pac.fillText("press ENTER to restart", pw/2, 3*ph/5);
+    }
     /*the game canvas is 'gc'*/
     const gameCanvas = document.getElementById('gameCanvas');
     const gc = gameCanvas.getContext('2d');
@@ -388,11 +433,14 @@ function outputs(){
     /*half of the width and height of the playable area is taken away from half the width and the height of the game canvas to work out the dx and dy*/
     gc.drawImage(playableArea,gw/2 - pw/2, gh/2 - ph/2);
 
-    gc.font = "20px squarewave-bold";
+
     gc.fillStyle = "white";
+    gc.font = "30px squarewave-bold";
 /*    gc.textAlign = "center";*/
-    gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, 20);
-    gc.fillText("score: " + player.score, 20, 50);
-    gc.fillText("high score: " + player.highScore, 20, 70);
+    gc.fillText("score: " + player.score, 20, 30);
+    gc.fillText("high score: " + player.highScore, 20, 50)
+    gc.fillText("currency: " + player.cumCurrency, gw-pw/2+20, 30);
+    gc.font = "30px squarewave-bold";
+    gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, gh-20);
 
 }
