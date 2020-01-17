@@ -11,22 +11,34 @@
 </head>
 <body onload="pageLoad()">
 <div class="content">
-    <div id="settingsOptions" class="options">
+    <form id="changeUsernameForm" class="form" style="display: none;">
+        <div id="usernameDiv">
+            <label for="usernameInput">username </label>
+            <input type="text" name="username" id="usernameInput" class="input">
+        </div>
+        <div id="changeUsernameConfirm"><span class="option" >change username</span></div>
+
+    </form>
+    <form id="passwordForm" class="form" style="display: none;">
+        <div id="passwordDiv">
+            <label for="passwordInput">password </label>
+            <input type="text" name="password" id="passwordInput" class="input">
+        </div>
+        <div id="changePasswordConfirm"><span class="option" >change password</span></div>
+        <div id="deleteAccountConfirm"><span class="option" >delete account</span></div>
+    </form>
+
+    <div id="settingsDiv">
         <div ><span id="changeUsernameOption" class="option">change username</span></div>
-        <form id="changeUsernameForm" class="form" style="display: none;">
-            <div id="usernameDiv">
-                <label for="usernameInput">username </label>
-                <input type="text" name="username" id="usernameInput" class="input">
-            </div>
-            <div id="changeUsernameConfirm"><span class="option" >change username</span></div>
-            <div id="cancelOption"><span class="option" >cancel</span></div>
-        </form>
         <div ><span id="changePasswordOption" class="option">change password</span></div>
         <div ><span id="deleteAccountOption" class="option">delete account</span></div>
         <div ><span id="logoutOption" class="option">log out</span></div>
-        <div ><span id="muteOption" class="option">mute</span></div>
-        <div ><span id="mainMenuOption" class="option">main menu</span></div>
+        <div ><span id="muteOption" class="option" style="display: none;">mute</span></div>
+        <div ><span id="unmuteOption" class="option" style="display: none;">unmute</span></div>
     </div>
+    <div ><span id="cancelOption" class="option" style="display: none;">cancel</span></div>
+    <div ><span id="mainMenuOption" class="option">main menu</span></div>
+
 </div>
 </body>
 </html>

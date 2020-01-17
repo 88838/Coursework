@@ -467,11 +467,10 @@ function outputs(){
     /*the x offset is the width of the whole game - the playable area, which gets you to the right edge of the playable area +20 so it's the same as the left side*/
     gc.fillText("currency: " + player.cumCurrency, gw-pw/2+20, 30);
     gc.fillText("lives: " + player.lives, gw-pw/2+20, 60);
-/*    gc.fillText("A and D to move", gw-pw/2+20, gh-50);
-    gc.fillText("SPACE to attack", gw-pw/2+20, gh-20);*/
     /*the player x and y need to be rounded so that they are not insanely large decimal numbers on the screen*/
     /*this text is in the bottom left corner*/
     gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, gh-20);
+    gc.fillText("stage: " + stage.stageid, gw-pw/2+20, gh-20);
     }
 
 }

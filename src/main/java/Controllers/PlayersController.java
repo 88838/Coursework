@@ -188,7 +188,7 @@ public class PlayersController {
     //this method was previously 'updateUsername' however I have now renamed it to be the same format as the API path
     //the cookie parameter is similar to the form data parameter however will be used specifically for tokens
     public String playersChangeUsername(
-            @CookieParam("token") String token, @FormDataParam("newUsername") String newUsername) {
+            @CookieParam("token") String token, @FormDataParam("username") String newUsername) {
         System.out.println("players/changeUsername");
         try {
             if(token == null || newUsername == null){
@@ -228,7 +228,7 @@ public class PlayersController {
     @Produces(MediaType.APPLICATION_JSON)
     //this method was previously 'updatePassword' however I have now renamed it to be the same format as the API path
     public String playersChangePassword(
-            @CookieParam("token") String token, @FormDataParam("newPassword") String newPassword) {
+            @CookieParam("token") String token, @FormDataParam("password") String newPassword) {
         System.out.println("players/changePassword");
         try {
             if(token == null || newPassword == null){

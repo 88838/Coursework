@@ -14,6 +14,7 @@ body {
     font-family: 'squarewave-bold', serif;
 }
 .content {
+    text-align: center;
     margin: auto;
     /*the content has a width of 1200px and no smaller than 1200px so when resized, things will not move around*/
     width: 1200px;
@@ -30,13 +31,6 @@ body {
     /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
     text-shadow:-5px 5px #c0006f;
 }
-
-.options {
-    /*the options div is 50%  width of the content div*/
-    text-align: center;
-    margin: auto;
-}
-
 #logoDiv {
     width: 100%;
     /*the logo div is 9% from the top, which then also pushes the options down as well*/
@@ -55,12 +49,11 @@ body {
 .form{
     font-size: 50pt;
     text-align: center;
-    margin: 9%;
+    margin-top: 9%;
 }
 
 .input{
     padding: 10px 10px;
-    margin: 8px 0;
     box-sizing: border-box;
     border: none;
     border-bottom: 5px #c0006f;
@@ -106,7 +99,7 @@ td{
     font-size: 35pt;
 }
 
-#settingsOptions{
+#settingsDiv{
     margin-top: 9%;
 }
 
