@@ -63,8 +63,11 @@ function pageLoad(){
                 loadStarImage.then(() => {
                     loadPlayer.then(() => {
                         player.setSkin();
-                        let music = new Music( "/client/img/interstellar.mp3");
-                        music.play();
+                        /*a music object is made, using the audio file source*/
+                        let music = new Music( "/client/audio/interstellar.m4a");
+                        /*the music is played*/
+                        if(Cookies.get("music") === "true") music.play();
+
                         stage = new Stage(stagesInfo[0][0], stagesInfo[0][1]);
                         /*the deaths need to be pushed for the first time when the page first loads*/
                         getDeaths();

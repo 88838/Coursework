@@ -68,6 +68,7 @@ function login(formData){
         } else {
             /*this time, a cookie is set in the browser, which is the randomly generated token from the api*/
             Cookies.set("token", responseData.token);
+            Cookies.set("music", "true");
             /*after the player has logged in, they will be redirected back to the main menu*/
             window.location.href = '/client/index.html';
         }

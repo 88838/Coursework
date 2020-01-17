@@ -33,6 +33,15 @@ public class ClientController {
     }
 
     @GET
+    @Path("audio/{path}")
+    //this allows audio files with file type of m4a to be used
+    @Produces({"audio/m4a"})
+    //the audio file is in the audio folder within the client folder
+    public byte[] getAudioFile(@PathParam("path") String path) {
+        return getFile("client/audio/" + path);
+    }
+
+    @GET
     @Path("js/{path}")
     @Produces({"text/javascript"})
     public byte[] getJavaScriptFile(@PathParam("path") String path) {

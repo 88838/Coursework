@@ -33,7 +33,6 @@ body {
 
 .options {
     /*the options div is 50%  width of the content div*/
-    width: 50%;
     text-align: center;
     margin: auto;
 }
@@ -53,14 +52,12 @@ body {
 
 /*------------login.html--------------*/
 
-#loginForm{
+.form{
     font-size: 50pt;
-    width: 50%;
     text-align: center;
-    margin: auto;
-    padding-top: 25%;
-    min-width: 15%;
+    margin: 9%;
 }
+
 .input{
     padding: 10px 10px;
     margin: 8px 0;

@@ -1,21 +1,24 @@
 class Music{
     constructor(src) {
-        this.sound = document.createElement("audio");
-        this.sound.src = src;
-        this.sound.setAttribute("preload", "auto");
-        this.sound.setAttribute("controls", "none");
-        this.sound.volume = 0.1;
-        this.sound.loop = true;
-        this.sound.style.display = "none";
-        document.body.appendChild(this.sound);
-
+        /*the audio attribute is set to an HTML audio element*/
+        this.audio = document.createElement("audio");
+        /*the source of the file is passed in as a parameter*/
+        this.audio.src = src;
+        /*the audio is set to 10% volume*/
+        this.audio.volume = 0.1;
+        /*the audio loops once it finished*/
+        this.audio.loop = true;
+        /*the entire file should be loaded when the page loads*/
+        this.audio.setAttribute("preload", "auto");
+        /*no controls such as pause or play should be displayed*/
+        this.audio.setAttribute("controls", "none");
+        /*the actual element shouldn't be displayed*/
+        this.audio.style.display = "none";
     }
     play(){
-        let playPromise = this.sound.play();
-
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-            }).catch(error => {});
-        }
+        /*when played, the element is added to the document*/
+        document.body.appendChild(this.audio);
+        /*the audio plays*/
+        this.audio.play();
     }
 }
