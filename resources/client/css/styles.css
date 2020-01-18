@@ -47,16 +47,21 @@ body {
 /*------------login.html--------------*/
 
 .form{
-    font-size: 50pt;
+    font-size: 65pt;
     text-align: center;
     margin-top: 9%;
 }
 
-.input{
+input /*[type=text]*/{
     padding: 10px 10px;
     box-sizing: border-box;
     border: none;
-    border-bottom: 5px #c0006f;
+    border-bottom: 5px solid #c0006f;
+    outline: none;
+    background-color: black;
+    color: white;
+    font-family: 'squarewave-bold', serif;
+    font-size: 30pt;
 }
 /*the game*/
 #gameCanvas{
