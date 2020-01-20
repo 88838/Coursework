@@ -104,7 +104,7 @@ public class UnlockedSkinsController {
                 System.out.println("Database error: " + exception.getMessage());
                 return "{\"error\": \"Unable to buy skin. Please see server console for more info.\"}";
             }
-
+            Main.db.setAutoCommit(true);
             return "{\"status\": \"OK\"}";
         } catch (Exception exception) {
             System.out.println("Database error: " + exception.getMessage());
