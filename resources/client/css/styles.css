@@ -91,11 +91,12 @@ input /*[type=text]*/{
     padding-right: 10px;
 }
 /*----------------*/
-td{
+.leaderboardCell{
     font-size: 25pt;
     padding-top: 10px;
 }
 #leaderboardDiv{
+    user-select: none;
     margin-top: 9%;
 }
 
@@ -107,4 +108,73 @@ td{
 #settingsDiv{
     margin-top: 9%;
 }
+#shopDiv{
+    user-select: none;
+    margin-top: 9%;
+}
+#shopTable{
+    margin:auto;
+    text-align: center;
+}
 
+.shopCell{
+    font-size: 45pt;
+}
+.space{
+    font-size: 45pt;
+    color: black;
+}
+.skin{
+    user-select: none;
+    padding-top: 50px;
+    font-size: 55pt;
+/*    background-color: red;*/
+}
+.buy{
+    user-select: none;
+    font-size: 55pt;
+/*    background-color: blue;*/
+    cursor: pointer;
+    user-select: none;
+    padding-bottom: 25px;
+}
+.select{
+    user-select: none;
+    font-size: 65pt;
+/*    background-color: purple;*/
+    cursor: pointer;
+    user-select: none;
+    padding-bottom: 25px;
+}
+#skinSelect1:hover, #skinBuy1:hover {
+    /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
+    text-shadow:-5px 5px red;
+}
+#skinSelect2:hover, #skinBuy2:hover {
+    /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
+    text-shadow:-5px 5px blue;
+}
+#skinSelect3:hover, #skinBuy3:hover {
+    /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
+    text-shadow:-5px 5px purple;
+}
+#skinSelect4:hover, #skinBuy4:hover {
+    /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
+    text-shadow:-5px 5px green;
+}
+
+#optionsLeft{
+    display:inline-block;
+    margin:auto;
+    width: 400px;
+}
+#optionsRight{
+    display:inline-block;
+    margin:auto;
+    width: 400px;
+}
+#currency{
+    user-select: none;
+    font-size: 55pt;
+    text-align: right;
+}

@@ -68,6 +68,8 @@ function login(formData){
         } else {
             /*this time, a cookie is set in the browser, which is the randomly generated token from the api*/
             Cookies.set("token", responseData.token);
+            /*a cookie is set for the player so if they are already logged in, the page knows whether they have the music turned on or not*/
+            /*true has to be a string because cookies are always strings*/
             Cookies.set("music", "true");
             /*after the player has logged in, they will be redirected back to the main menu*/
             window.location.href = '/client/index.html';

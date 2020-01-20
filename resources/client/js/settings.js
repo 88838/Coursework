@@ -1,37 +1,38 @@
 function pageLoad() {
     checkToken(
-        /*success and fail are defined using arrow notation when checkToken is called.*/
         () => {},
         () => {window.location.href = "/client/login.html";}
     );
     document.getElementById("mainMenuOption").addEventListener("click", ()=> window.location.href = "/client/index.html");
+    /*similar to the login page, the function showDiv is used to change what is being shown on the page*/
     document.getElementById("changeUsernameOption").addEventListener("click", function() {showDiv("changeUsername");});
     document.getElementById("changePasswordOption").addEventListener("click", function() {showDiv("changePassword");});
     document.getElementById("deleteAccountOption").addEventListener("click", function() {showDiv("deleteAccount");});
-    document.getElementById("logoutOption").addEventListener("click", () =>{
-        Cookies.remove("token");
-        Cookies.remove("music");
-        window.location.href = "/client/login.html";
-    });
+    document.getElementById("cancelOption").addEventListener("click", function() {showDiv("cancelOption");});
+
+    /*depending on the music cookie, the mute or unmute option is shown*/
     if(Cookies.get("music")==="true"){
         document.getElementById("muteOption").style.display = "block";
     }else if(Cookies.get("music")==="false"){
         document.getElementById("unmuteOption").style.display = "block";
     }
+    /*the music cookie is set to false if the player clicks mute, and true if they player clicks unmute*/
     document.getElementById("muteOption").addEventListener("click", () =>{
-        Cookies.set("music", "false")
+        Cookies.set("music", "false");
         document.getElementById("muteOption").style.display = "none";
         document.getElementById("unmuteOption").style.display = "block";
     });
     document.getElementById("unmuteOption").addEventListener("click", () =>{
-        Cookies.set("music", "true")
+        Cookies.set("music", "true");
         document.getElementById("muteOption").style.display = "block";
         document.getElementById("unmuteOption").style.display = "none";
     });
 
-    document.getElementById("cancelOption").addEventListener("click", function() {showDiv("cancelOption");});
     document.getElementById("changeUsernameConfirm").addEventListener("click", function() {processPlayerData("changeUsername");});
     document.getElementById("changePasswordConfirm").addEventListener("click", function() {processPlayerData("changePassword");});
+    document.getElementById("deleteAccountConfirm").addEventListener("click", function() {processPlayerData("deleteAccount");});
+    document.getElementById("logoutOption").addEventListener("click", function() {processPlayerData("logout");});
+
 }
 function showDiv(optionType) {
     if(optionType === "changeUsername"){
@@ -59,24 +60,39 @@ function showDiv(optionType) {
 }
 function processPlayerData(processType) {
     if(processType==="changeUsername"){
+        /*the form is taken as the changeUsernameForm*/
         const form = document.getElementById("changeUsernameForm");
         const formData = new FormData(form);
         fetch("/players/changeUsername", {method: 'post', body: formData}
-
         ).then(response => response.json()
         ).then(responseData => {
             if (responseData.hasOwnProperty('error')) alert(responseData.error);
+            /*the page is reloaded once the player has changed the username to make sure everything is saved properly*/
             location.reload();
         });
     }else if(processType==="changePassword"){
+        /*the changePassword and deleteAccount options both user the passwordForm*/
         const form = document.getElementById("passwordForm");
         const formData = new FormData(form);
         fetch("/players/changePassword", {method: 'post', body: formData}
-
         ).then(response => response.json()
         ).then(responseData => {
             if (responseData.hasOwnProperty('error')) alert(responseData.error);
             location.reload();
         });
+    }else if(processType==="deleteAccount") {
+        const form = document.getElementById("passwordForm");
+        const formData = new FormData(form);
+        fetch("/players/delete", {method: 'post', body: formData}
+        ).then(response => response.json()
+        ).then(responseData => {
+            if (responseData.hasOwnProperty('error')) alert(responseData.error);
+            location.reload();
+        });
+    }else if(processType==="logout") {
+        /*when the player logs out, the cookies are removed, and the player is redirected to the login page*/
+        Cookies.remove("token");
+        Cookies.remove("music");
+        window.location.href = "/client/login.html";
     }
 }

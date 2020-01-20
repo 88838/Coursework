@@ -42,14 +42,14 @@ function pageLoad(){
             leaderboardHTML +=
                 `<tr class ="playerDataRow">` +
                 /*the data cells will have the player username and data*/
-                `<td>${playerDb.username}</td>` +
-                `<td>${highScore}</td>`;
+                `<td class = "leaderboardCell">${playerDb.username}</td>` +
+                `<td class = "leaderboardCell">${highScore}</td>`;
             try {
                 for (let kills of playerDb.kills) {
                     leaderboardHTML +=
                         /*the kills are filled with the number of kills that the player has for each monster*/
                         /*the monsters appear chronologically in the game, they will be stored in order in the database as well*/
-                        `<td>${kills.numberOfKills}</td>`;
+                        `<td class = "leaderboardCell">${kills.numberOfKills}</td>`;
                 }
             }catch{}
             leaderboardHTML += `</tr>`;

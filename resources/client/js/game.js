@@ -65,7 +65,7 @@ function pageLoad(){
                         player.setSkin();
                         /*a music object is made, using the audio file source*/
                         let music = new Music( "/client/audio/interstellar.m4a");
-                        /*the music is played*/
+                        /*the music is played if the cookie is true*/
                         if(Cookies.get("music") === "true") music.play();
 
                         stage = new Stage(stagesInfo[0][0], stagesInfo[0][1]);
