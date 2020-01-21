@@ -19,8 +19,8 @@ let loadSkinImages = new Promise(function(resolve) {
     ).then(skinsDb => {
         if (skinsDb.hasOwnProperty('error')) alert(skinsDb.error);
         for (let skinDb of skinsDb) {
-/*            console.log(skinDb.imageFile);
-            console.log(skinDb.skinid);*/
+            /*            console.log(skinDb.imageFile);
+                        console.log(skinDb.skinid);*/
             let image = new Image();
             /*the temporary image object's source is taken from the skins in the json response*/
             image.src = skinDb.imageFile;
@@ -84,13 +84,15 @@ class Player{
         this.cooldown = false;
         /*the cooldown timer is the time left of the cooldown, set to 0 at the start because the player has not yet attacked*/
         this.cooldownTimer = 0;
+        this.spriteFrame = 11;
     }
     draw(context){
         /*if the player is dead, they are not drawn*/
         if(!this.alive) return;
         /*the player is drawn in the middle of the playable area*/
         /*half the width and the height are taken away because the drawImage function draws from the corner*/
-        context.drawImage(this.image, this.x - this.image.width/2, this.y - this.image.height/2);
+        context.drawImage(this.image, this.spriteFrame *  64, 0, 64, 64, this.x - 32, this.y - 32, 64, 64);
+        /*    context.drawImage(this.image, this.x - this.image.width/2, this.y - this.image.height/2);*/
     }
     update(frameLength) {
         /*if the player is dead, they are not updated*/
@@ -107,14 +109,14 @@ class Player{
 
 
         /*if the x coordinate is smaller than half the player's width, then they the x coordinate is reset to that same value*/
-        if (this.x < this.image.width/2) {
-            this.x = this.image.width/2;
+        if (this.x < 32) {
+            this.x = 32;
             /*the velocity is set to 0 because technically the player is stopping*/
             this.dx = 0;
         }
         /*the same happens on the other side of the playable area*/
-        if (this.x > pw - this.image.width/2) {
-            this.x = pw - this.image.width/2;
+        if (this.x > pw - 32) {
+            this.x = pw - 32;
             this.dx = 0;
         }
 

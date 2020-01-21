@@ -70,8 +70,6 @@ function pageLoad(){
 
                         stage = new Stage(stagesInfo[0][0], stagesInfo[0][1]);
                         /*the deaths need to be pushed for the first time when the page first loads*/
-                        getDeaths();
-
                         /*if the player is alive, a new monster is pushed every 450 milliseconds*/
                         setInterval(() => {
                             if (player.alive) spawnMonster()
@@ -90,6 +88,16 @@ function pageLoad(){
                         /*this is ongoing, so that even if the player doesn't kill any monsters or collects any currency, it still adds score for as long as they survive*/
                         setInterval(() => {
                             if (player.alive) player.score += 1
+                        }, 100);
+
+                        setInterval(() => {
+                            if (player.alive) {
+                                if (player.spriteFrame === 14) {
+                                    player.spriteFrame = 11;
+                                } else {
+                                    player.spriteFrame++;
+                                }
+                            }
                         }, 100);
                         /*the gameFrame function has to be requested for the first time in when the page loads*/
                         window.requestAnimationFrame(gameFrame);
@@ -161,6 +169,7 @@ function inputs(frameLength){
         player.artificialY = 0;
         player.x = pw/2;
         player.alive = true;
+        getDeaths();
     }
 }
 
@@ -305,10 +314,21 @@ function processes(frameLength){
     /*the setImage method is used instead of manually checking the stageid*/
     stage.setImage();
     /*the player is given a very short amount of time, between when the timer is 1 and 0.75 (equating to around 15 frames) where they are attacking and can kill an enemy*/
-    if(player.cooldownTimer > 0.75){
+    if(player.cooldownTimer > 0.5){
         player.attacking = true;
     }else{
         player.attacking = false;
+    }
+
+    /*    if (player.cooldownTimer === 0) {
+            player.spriteFrame = 11;
+        } else{
+            for(let i = 0; i < 12; i++) {
+                if (player.cooldownTimer < (12-i)/12 && player.cooldownTimer > (11-i)/12) player.spriteFrame = i;
+            }
+        }*/
+    for(let i = 0; i < 12; i++) {
+        if (player.cooldownTimer < (12-i)/12 && player.cooldownTimer > (11-i)/12) player.spriteFrame = i;
     }
 
     /*once the cooldown reaches 0 then the cooldown is set to false because it has finished*/
@@ -394,6 +414,7 @@ function processes(frameLength){
 const playableArea = new OffscreenCanvas(pw, ph);
 
 function outputs(){
+    console.log(player.spriteFrame);
     /*the context for the playable area is set as a constant called 'pac' (playable area canvas)*/
     const pac = playableArea.getContext('2d');
     /*I have finally changed the base colour of the playable area to be the same hot pink used throughout the rest of the website*/
@@ -458,19 +479,19 @@ function outputs(){
     gc.drawImage(playableArea,gw/2 - pw/2, gh/2 - ph/2);
 
     if(player.artificialY !=0){
-    gc.fillStyle = "white";
-    gc.font = "35px squarewave-bold";
-    /*the score and high score are in top left corner*/
-    /*the y offset is larger than the x offset because font size of the number being displayed is larger than the size of the characters so it needs to be accounted for*/
+        gc.fillStyle = "white";
+        gc.font = "35px squarewave-bold";
+        /*the score and high score are in top left corner*/
+        /*the y offset is larger than the x offset because font size of the number being displayed is larger than the size of the characters so it needs to be accounted for*/
         gc.fillText("high score: " + player.highScore, 20, 30)
         gc.fillText("score: " + player.score, 20, 60);
-    /*the x offset is the width of the whole game - the playable area, which gets you to the right edge of the playable area +20 so it's the same as the left side*/
-    gc.fillText("currency: " + player.cumCurrency, gw-pw/2+20, 30);
-    gc.fillText("lives: " + player.lives, gw-pw/2+20, 60);
-    /*the player x and y need to be rounded so that they are not insanely large decimal numbers on the screen*/
-    /*this text is in the bottom left corner*/
-    gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, gh-20);
-    gc.fillText("stage: " + stage.stageid, gw-pw/2+20, gh-20);
+        /*the x offset is the width of the whole game - the playable area, which gets you to the right edge of the playable area +20 so it's the same as the left side*/
+        gc.fillText("currency: " + player.cumCurrency, gw-pw/2+20, 30);
+        gc.fillText("lives: " + player.lives, gw-pw/2+20, 60);
+        /*the player x and y need to be rounded so that they are not insanely large decimal numbers on the screen*/
+        /*this text is in the bottom left corner*/
+        gc.fillText("x: " + Math.round(player.x) + ", y: " + Math.round(player.artificialY), 20, gh-20);
+        gc.fillText("stage: " + stage.stageid, gw-pw/2+20, gh-20);
     }
 
 }

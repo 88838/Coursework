@@ -20,11 +20,12 @@ class Death{
         /*the opacity of the image and the text is half*/
         context.globalAlpha = 0.5;
         /*the player image is drawn ph/4 (150px) above the death's x and y coordinates, to account for the player's offset from the top of the playable area*/
-        context.drawImage(player.image, this.x - player.image.width/2, this.artificialY - player.image.height/2 + ph/4);
+        context.drawImage(player.image, 11 * 64, 0, 64, 64, this.x - 32, this.artificialY - 32 + ph/4, 64, 64);
+        /*        context.drawImage(player.image, this.x - player.image.width/2, this.artificialY - player.image.height/2 + ph/4);*/
         /*the text is drawn below the player image (x is 3/4 of the image below, and y is the full height below)*/
         context.fillText("x: " + this.x, this.x, this.artificialY + ph/4 + 3*player.image.height/4);
         context.fillText("y: " + this.y, this.x, this.artificialY + ph/4 + player.image.height);
-/*        context.fillText("lives left: " + this.livesLeft, this.x, this.artificialY + ph/4 + 5*player.image.height/4);*/
+        /*        context.fillText("lives left: " + this.livesLeft, this.x, this.artificialY + ph/4 + 5*player.image.height/4);*/
         /*the globalAlpha has to be reset so that the rest of the game is drawn at full opacity*/
         context.globalAlpha = 1;
     }

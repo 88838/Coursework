@@ -9,6 +9,7 @@
         <module name="terminalVelocityProject" />
         <module name="Coursework" />
         <module name="terminalVelocity" />
+        <module name="terminalVelocityTemp" />
       </profile>
     </annotationProcessing>
   </component>
