@@ -167,9 +167,7 @@ public class PlayersController {
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
             PreparedStatement psNewPlayer = Main.db.prepareStatement("INSERT INTO Players (username, password) VALUES (?,?)");
-
             checkPassword(password);
-
             psNewPlayer.setString(1, username);
             psNewPlayer.setString(2, password);
             psNewPlayer.executeUpdate();

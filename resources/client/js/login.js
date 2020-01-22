@@ -37,7 +37,7 @@ function processPlayerData(processType) {
     const formData = new FormData(form);
     /*if the processType is "login", then the login function will be run straight away, with the form data as the parameter*/
     if(processType==="login"){
-        login(formData);
+        login(formData, processType);
     /*if the process type is "signUp then the /players/new api is first run*/
     }else if(processType==="signUp"){
         /*the method is a post method, so this needs to be specified, and the body of the api is the form data*/
@@ -49,15 +49,17 @@ function processPlayerData(processType) {
             if (responseData.hasOwnProperty('error')) {
                 alert(responseData.error);
             } else {
+
                 /*if there is no error then the login function will be run, after the player has been created*/
                 /*this is so that the new player doesn't have to log in again after just signing up, which makes it easier for them*/
-                login(formData);
+                login(formData, processType);
             }
         });
     }
 }
 
-function login(formData){
+/*the processType is now passed in*/
+function login(formData, processType){
     /*like before, the api is fetched*/
     fetch("/players/login", {method: 'post', body: formData}
     ).then(response => response.json()
@@ -66,11 +68,23 @@ function login(formData){
         if (responseData.hasOwnProperty('error')) {
             alert(responseData.error);
         } else {
+
             /*this time, a cookie is set in the browser, which is the randomly generated token from the api*/
             Cookies.set("token", responseData.token);
             /*a cookie is set for the player so if they are already logged in, the page knows whether they have the music turned on or not*/
             /*true has to be a string because cookies are always strings*/
             Cookies.set("music", "true");
+            /*if the player is signing up then the skin with skinid 1 must be bought because it is the default skin, and must be unlocked*/
+            if(processType==="signUp"){
+                let formDataSkin = new FormData();
+                formDataSkin.append("skinid", "1");
+                fetch('/unlockedSkins/new/', {method: 'post', body: formDataSkin}
+                ).then(response => response.json()
+                ).then(unlockedSkinsDb => {
+                    if (unlockedSkinsDb.hasOwnProperty('error')) alert(unlockedSkinsDb.error);
+                    /*the shop info is refreshed to show which skin the player has bought, what skin is selected, and the currency is updated*/
+                });
+            }
             /*after the player has logged in, they will be redirected back to the main menu*/
             window.location.href = '/client/index.html';
         }

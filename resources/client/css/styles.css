@@ -140,7 +140,7 @@ input /*[type=text]*/{
 }
 .select{
     user-select: none;
-    font-size: 65pt;
+    font-size: 55pt;
 /*    background-color: purple;*/
     cursor: pointer;
     user-select: none;
@@ -148,19 +148,19 @@ input /*[type=text]*/{
 }
 #skinSelect1:hover, #skinBuy1:hover {
     /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
-    text-shadow:-5px 5px red;
+    text-shadow:-5px 5px #c0006f;
 }
 #skinSelect2:hover, #skinBuy2:hover {
     /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
-    text-shadow:-5px 5px blue;
+    text-shadow:-5px 5px #3EDAD5;
 }
 #skinSelect3:hover, #skinBuy3:hover {
     /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
-    text-shadow:-5px 5px purple;
+    text-shadow:-5px 5px #5A009F;
 }
 #skinSelect4:hover, #skinBuy4:hover {
     /*when the player hovers over any option within the option class, a drop shadow shows up at an offset of 5 pixels down and left*/
-    text-shadow:-5px 5px green;
+    text-shadow:-5px 5px #8DD400;
 }
 
 #optionsLeft{
