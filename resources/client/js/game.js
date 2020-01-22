@@ -99,6 +99,19 @@ function pageLoad(){
                                 }
                             }
                         }, 100);
+                        setInterval(() => {
+                            if (player.alive) {
+                                for (let monster of monsters) {
+                                    if (monster.spriteFrame === 2 && monster.monsterid ===1) {
+                                        monster.spriteFrame = 0;
+                                    }else if (monster.spriteFrame === 3 && (monster.monsterid ===2||monster.monsterid ===3||monster.monsterid ===4)) {
+                                            monster.spriteFrame = 0;
+                                    } else {
+                                        monster.spriteFrame++;
+                                    }
+                                }
+                            }
+                        }, 250);
                         /*the gameFrame function has to be requested for the first time in when the page loads*/
                         window.requestAnimationFrame(gameFrame);
 
@@ -320,13 +333,10 @@ function processes(frameLength){
         player.attacking = false;
     }
 
-    /*    if (player.cooldownTimer === 0) {
-            player.spriteFrame = 11;
-        } else{
-            for(let i = 0; i < 12; i++) {
-                if (player.cooldownTimer < (12-i)/12 && player.cooldownTimer > (11-i)/12) player.spriteFrame = i;
-            }
-        }*/
+    for(let i = 1; i <5; i++){
+        if (player.skinid == i) for (let star of stars) star.spriteFrame = i-1;
+    }
+
     for(let i = 0; i < 12; i++) {
         if (player.cooldownTimer < (12-i)/12 && player.cooldownTimer > (11-i)/12) player.spriteFrame = i;
     }
@@ -414,7 +424,6 @@ function processes(frameLength){
 const playableArea = new OffscreenCanvas(pw, ph);
 
 function outputs(){
-    console.log(player.spriteFrame);
     /*the context for the playable area is set as a constant called 'pac' (playable area canvas)*/
     const pac = playableArea.getContext('2d');
     /*I have finally changed the base colour of the playable area to be the same hot pink used throughout the rest of the website*/
@@ -424,9 +433,7 @@ function outputs(){
     stage.draw(pac);
     /*the player is drawn, passing in the 'pac' as the context*/
     player.draw(pac);
-    for (let projectile of projectiles){
-        projectile.draw(pac);
-    }
+
     for(let monster of monsters){
         monster.draw(pac);
     }
@@ -437,6 +444,9 @@ function outputs(){
 
     for(let death of deaths){
         death.draw(pac);
+    }
+    for (let projectile of projectiles){
+        projectile.draw(pac);
     }
 
     /*the player's artificial Y will only be exactly 0 when they first load in, and for a frame when they respawn or die, however the latter will not affect the screen because it is so miniscule of a time frame*/

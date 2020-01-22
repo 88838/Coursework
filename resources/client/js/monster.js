@@ -47,12 +47,13 @@ class Monster{
         this.alive = true;
         /*this is the value of the monster, and if the player kills the monster then they will gain this amount of score*/
         this.value = (parseInt(this.monsterid))*100;
-
+        this.spriteFrame = 0;
     }
 
     draw(context){
         if (!this.alive) return;
-        context.drawImage(this.image, this.x - this.image.width/2, this.y- this.image.height/2);
+        context.drawImage(this.image, this.spriteFrame *  64, 0, 64, 64, this.x - 32, this.y - 32, 64, 64);
+        /*    context.drawImage(this.image, this.x - this.image.width/2, this.y - this.image.height/2);*/
     }
 
     update(frameLength) {
@@ -61,14 +62,14 @@ class Monster{
         this.x += frameLength * this.dx;
         this.y += frameLength * this.dy;
 
-        if (this.x < this.image.width/2) {
-            this.x = this.image.width/2;
+        if (this.x < 32) {
+            this.x = 32;
             /*the velocity is set to the negative of the current velocity, causing them to chang direction and essentially bounce off the 'wall'*/
             this.dx = -this.dx;
         }
         /*the same happens on the other side of the playable area*/
-        if (this.x > pw - this.image.width/2) {
-            this.x = pw - this.image.width/2;
+        if (this.x > pw - 32) {
+            this.x = pw - 32;
             this.dx = -this.dx;
         }
     }

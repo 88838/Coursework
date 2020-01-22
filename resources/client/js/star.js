@@ -21,11 +21,12 @@ class Star{
         this.active = true;
         /*the star will give the player score, but will also give them currency, which will calculated later*/
         this.value = 500;
+        this.spriteFrame = 0;
     }
 
     draw(context){
         if (!this.active) return;
-        context.drawImage(this.image, this.x - this.image.width/2, this.y- this.image.height/2);
+        context.drawImage(this.image, this.spriteFrame *  64, 0, 64, 64, this.x - 32, this.y - 32, 64, 64);
     }
 
     update(frameLength) {

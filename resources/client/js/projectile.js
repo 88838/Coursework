@@ -18,7 +18,7 @@ class Projectile{
         context.beginPath();
         /*the drawing of a rectangle works the same as images, from the top left corner*/
         /*the width and height is 10, so half the height needs to be taken away to get to the top left corner*/
-        context.rect(this.x - 5, this.y - 5, 10, 10);
+        context.rect(this.x - 5, this.y-20, 10, 10);
         context.fill();
     }
     /*same as the other update methods*/

@@ -106,8 +106,6 @@ class Player{
         /*if the cooldown is true then the cooldownTimer will decrease by one framelength per frame*/
         if(this.cooldown) this.cooldownTimer -= frameLength;
 
-
-
         /*if the x coordinate is smaller than half the player's width, then they the x coordinate is reset to that same value*/
         if (this.x < 32) {
             this.x = 32;

@@ -15,41 +15,35 @@ function getShopInfo(){
             if (skinsDb.hasOwnProperty('error')) alert(skinsDb.error);
             /*this loops through all of the skins*/
             for(let skinDb of skinsDb) {
-                /*this loops through the amount of skin divs in the html*/
-                for(let i = 1; i < 5; i++){
-                    if(skinDb.skinid === i){
-                        document.getElementById("skinBuy" + i).innerText = "buy: " + skinDb.cost;
-                        /*if the skinid in the database is the same as the current i then the skin text is populated with the skin name*/
-                        document.getElementById("skin" + i).innerText = skinDb.skinName;
-                        fetch('/unlockedSkins/list/', {method: 'get'}
-                        ).then(response => response.json()
-                        ).then(unlockedSkinsDb => {
-                            if (unlockedSkinsDb.hasOwnProperty('error')) alert(unlockedSkinsDb.error);
-                            for(let unlockedSkinDb of unlockedSkinsDb){
-
-                                /*if the playerid is the same as the playerid in the unlockedSkins table then the player has unlocked the skin and therefore can select it*/
-                                if (unlockedSkinDb.skinid === skinDb.skinid) {
-                                    if (playerDb.playerid === unlockedSkinDb.playerid) {
-                                        /*if the current unlockedSkin is the same as the current skin that's being looped through the select option is shown and the buy option is hidden*/
-                                        document.getElementById("skinSelect" + i).style.display = "block";
-                                        document.getElementById("skinBuy" + i).style.display = "none";
-                                        /*if the current skin being looped through is the same as the current skin that the player has selected, then the text says selected*/
-                                        if (unlockedSkinDb.skinid == playerDb.skinid) {
-                                            document.getElementById("skinSelect" + i).innerText = "selected";
-                                        }else {
-                                            /*if the player has not selected the current skin in the loop, then the option to select the skin shows up*/
-                                            document.getElementById("skinSelect" + i).innerText = "select";
-                                        }
-                                    } else {
-                                        /*if the player has not bought the skin , then the option to buy a skin shows up, with the cost of the skin*/
-                                        document.getElementById("skinBuy" + i).style.display = "block";
-                                        document.getElementById("skinSelect" + i).style.display = "none";
-                                    }
-                                }
+                /*the skin div is populated with the skin's name*/
+                document.getElementById("skin" + skinDb.skinid).innerText = skinDb.skinName;
+                fetch('/unlockedSkins/get/'  + Cookies.get("token"), {method: 'get'}
+                ).then(response => response.json()
+                ).then(unlockedSkinsDb => {
+                    if (unlockedSkinsDb.hasOwnProperty('error')) alert(unlockedSkinsDb.error);
+                    for(let unlockedSkinDb of unlockedSkinsDb){
+                        /*if the current unlockedSkin is the same as the current skin that's being looped through the select option is shown and the buy option is hidden*/
+                        if (unlockedSkinDb.skinid == skinDb.skinid) {
+                            document.getElementById("skinSelect" + skinDb.skinid).style.display = "block";
+                            document.getElementById("skinBuy" + skinDb.skinid).style.display = "none";
+                            /*if the unlockedSKin being looped through is the same as the skin that the player has selected, then the text says selected*/
+                            if (unlockedSkinDb.skinid == playerDb.skinid) {
+                                document.getElementById("skinSelect" + skinDb.skinid).innerText = "selected";
+                            }else {
+                                /*if the player has not selected the current skin in the loop, then the option to select the skin shows up*/
+                                document.getElementById("skinSelect" + skinDb.skinid).innerText = "select";
                             }
-                        });
+                            /*if the skin is unlocked, then the loop can break and that skin doesn't need to be checked if it's unlocked anymore*/
+                            break;
+                        } else {
+                            /*if the player has not bought the skin , then the option to buy a skin shows up, with the cost of the skin*/
+                            document.getElementById("skinBuy" + skinDb.skinid).innerText = "buy: " + skinDb.cost;
+                            document.getElementById("skinBuy" + skinDb.skinid).style.display = "block";
+                            document.getElementById("skinSelect" + skinDb.skinid).style.display = "none";
+
+                        }
                     }
-                }
+                });
             }
         });
     });

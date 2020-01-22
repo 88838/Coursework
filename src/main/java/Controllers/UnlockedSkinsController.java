@@ -36,6 +36,29 @@ public class UnlockedSkinsController {
         }
     }
 
+    @GET
+    @Path("get/{token}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String deathsGet(@PathParam("token") String token) {
+        System.out.println("unlockedSkins/get");
+        JSONArray list = new JSONArray();
+        try{
+            int playerid = Controllers.PlayersController.identifyPlayer(token);
+            PreparedStatement psGetDeaths = Main.db.prepareStatement("SELECT skinid FROM UnlockedSkins WHERE playerid = ?");
+            psGetDeaths.setInt(1, playerid);
+            ResultSet deathsResults = psGetDeaths.executeQuery();
+            while (deathsResults.next()) {
+                JSONObject item = new JSONObject();
+                item.put("skinid", deathsResults.getInt(1));
+                list.add(item);
+            }
+            return list.toString();
+        } catch (Exception exception) {
+            System.out.println("Database error: " + exception.getMessage());
+            return "{\"error\": \"Unable to list skins. Please see server console for more info.\"}";
+        }
+    }
+
     @POST
     @Path("new")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
