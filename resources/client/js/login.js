@@ -40,6 +40,25 @@ function processPlayerData(processType) {
         login(formData, processType);
     /*if the process type is "signUp then the /players/new api is first run*/
     }else if(processType==="signUp"){
+        let username = document.getElementById("usernameInput").value;
+        let password = document.getElementById("passwordInput").value;
+
+        /*the regular expression uses a lookahead to check all characters for lowercase, uppercase letters and digits*/
+        /*it also checks that the password is bigger than 8, with no upper boundary (that's why there is a comma)*/
+        let passwordRegExp = /(?=.+[a-z])(?=.+[A-Z])(?=.+[0-9])(?=.{8,})/;
+        /*if the password does not pass the test, then an error pops up and the function is returned */
+        if(!passwordRegExp.test(password)) {
+            alert("error: Password must be bigger than 8 characters, contain an uppercase and lowercase letter, contain a digit.")
+            return;
+        }
+        /*all the whitespace in the username is deleted*/
+        let fixedUsername = username.replace(/\s+/g, "")
+        let usernameRegExp = /(?=.{1,16})/;
+        /*if the username is not between 1 and 16 characters after the whitespace is deleted, then an error pops up*/
+        if(!usernameRegExp.test(fixedUsername)){
+            alert("error: Username must be at least 1 character and less than 16 characters")
+            return;
+        }
         /*the method is a post method, so this needs to be specified, and the body of the api is the form data*/
         fetch("/players/new", {method: 'post', body: formData}
         /*this is a promise function that returns the response in json*/

@@ -92,9 +92,11 @@ function pageLoad(){
 
                         setInterval(() => {
                             if (player.alive) {
+                                /*if the spriteFrame is the last frame, it resets*/
                                 if (player.spriteFrame === 14) {
                                     player.spriteFrame = 11;
                                 } else {
+                                    /*otherwise, the sprite frame increases every 100 milliseconds, which animates the player*/
                                     player.spriteFrame++;
                                 }
                             }
@@ -102,8 +104,10 @@ function pageLoad(){
                         setInterval(() => {
                             if (player.alive) {
                                 for (let monster of monsters) {
+                                    /*the first monster only has 3 sprite frames*/
                                     if (monster.spriteFrame === 2 && monster.monsterid ===1) {
                                         monster.spriteFrame = 0;
+                                    /*whereas the other monsters have 4 sprite frames*/
                                     }else if (monster.spriteFrame === 3 && (monster.monsterid ===2||monster.monsterid ===3||monster.monsterid ===4)) {
                                             monster.spriteFrame = 0;
                                     } else {

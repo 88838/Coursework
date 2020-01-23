@@ -167,7 +167,11 @@ public class PlayersController {
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
             }
             PreparedStatement psNewPlayer = Main.db.prepareStatement("INSERT INTO Players (username, password) VALUES (?,?)");
-            checkPassword(password);
+            try{
+                checkPassword(password);
+            } catch (Exception exception) {
+                return "{\"error\": \"Password must be bigger than 8 characters, contain an uppercase and lowercase letter, contain a digit.\"}";
+            }
             psNewPlayer.setString(1, username);
             psNewPlayer.setString(2, password);
             psNewPlayer.executeUpdate();
@@ -250,9 +254,11 @@ public class PlayersController {
             }
 
             PreparedStatement ps = Main.db.prepareStatement("UPDATE Players SET password = ? WHERE playerid = ?");
-
-            checkPassword(newPassword);
-
+            try{
+                checkPassword(newPassword);
+            } catch (Exception exception) {
+                return "{\"error\": \"Password must be bigger than 8 characters, contain an uppercase and lowercase letter, contain a digit.\"}";
+            }
             ps.setString(1, newPassword);
             ps.setInt(2, playerid);
             ps.executeUpdate();

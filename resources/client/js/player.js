@@ -90,9 +90,12 @@ class Player{
         /*if the player is dead, they are not drawn*/
         if(!this.alive) return;
         /*the player is drawn in the middle of the playable area*/
-        /*half the width and the height are taken away because the drawImage function draws from the corner*/
-        context.drawImage(this.image, this.spriteFrame *  64, 0, 64, 64, this.x - 32, this.y - 32, 64, 64);
-        /*    context.drawImage(this.image, this.x - this.image.width/2, this.y - this.image.height/2);*/
+        /*context.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);*/
+        /*the width and height of the images are now hardCoded, because the width of the player image will not be 64, due to the many sprites*/
+        /*spriteFrame has to be 1 less than the actual sprite frame due to the fact that drawImage draws from the left corner*/
+        /*i.e. if the spriteFrame is 0, sx will be 0 and the first sprite will be drawn*/
+        context.drawImage(this.image, /*sx*/ this.spriteFrame *  64 , /*sy*/ 0 , /*sWidth*/ 64, /*sHeight*/ 64, /*dx*/ this.x - 32, /*dy*/ this.y - 32, /*dWidth*/ 64, /*dHeight*/ 64);
+/*            context.drawImage(this.image, this.x - this.image.width/2, this.y - this.image.height/2);*/
     }
     update(frameLength) {
         /*if the player is dead, they are not updated*/

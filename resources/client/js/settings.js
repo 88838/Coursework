@@ -59,7 +59,17 @@ function showDiv(optionType) {
     }
 }
 function processPlayerData(processType) {
+    let username = document.getElementById("usernameInput").value;
+    let password = document.getElementById("passwordInput").value;
+    let passwordRegExp = /(?=.+[a-z])(?=.+[A-Z])(?=.+[0-9])(?=.{8,})/;
+    let fixedUsername = username.replace(/\s+/g, "")
+    let usernameRegExp = /(?=.{1,16})/;
+
     if(processType==="changeUsername"){
+        if(!usernameRegExp.test(fixedUsername)) {
+            alert("error: Username must be at least 1 character and less than 16 characters")
+            return;
+        }
         /*the form is taken as the changeUsernameForm*/
         const form = document.getElementById("changeUsernameForm");
         const formData = new FormData(form);
@@ -71,6 +81,10 @@ function processPlayerData(processType) {
             location.reload();
         });
     }else if(processType==="changePassword"){
+        if(!passwordRegExp.test(password)) {
+            alert("error: Password must be bigger than 8 characters, contain an uppercase and lowercase letter, contain a digit.")
+            return;
+        }
         /*the changePassword and deleteAccount options both user the passwordForm*/
         const form = document.getElementById("passwordForm");
         const formData = new FormData(form);
