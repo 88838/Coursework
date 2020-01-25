@@ -61,8 +61,9 @@ function showDiv(optionType) {
 function processPlayerData(processType) {
     let username = document.getElementById("usernameInput").value;
     let password = document.getElementById("passwordInput").value;
+    let fixedPassword = password.replace(/\s+/g, "");
+    let fixedUsername = username.replace(/\s+/g, "");
     let passwordRegExp = /(?=.+[a-z])(?=.+[A-Z])(?=.+[0-9])(?=.{8,})/;
-    let fixedUsername = username.replace(/\s+/g, "")
     let usernameRegExp = /(?=.{1,16})/;
 
     if(processType==="changeUsername"){
@@ -81,7 +82,7 @@ function processPlayerData(processType) {
             location.reload();
         });
     }else if(processType==="changePassword"){
-        if(!passwordRegExp.test(password)) {
+        if(!passwordRegExp.test(fixedPassword)) {
             alert("error: Password must be bigger than 8 characters, contain an uppercase and lowercase letter, contain a digit.")
             return;
         }
@@ -100,8 +101,13 @@ function processPlayerData(processType) {
         fetch("/players/delete", {method: 'post', body: formData}
         ).then(response => response.json()
         ).then(responseData => {
-            if (responseData.hasOwnProperty('error')) alert(responseData.error);
-            location.reload();
+            if (responseData.hasOwnProperty('error')) {
+                alert(responseData.error);
+            }else{
+                window.location.href = "/client/login.html";
+            }
+
+
         });
     }else if(processType==="logout") {
         /*when the player logs out, the cookies are removed, and the player is redirected to the login page*/

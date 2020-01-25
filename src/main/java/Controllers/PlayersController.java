@@ -396,7 +396,7 @@ public class PlayersController {
     @Produces(MediaType.APPLICATION_JSON)
     public String playersDelete(
             @CookieParam("token") String token, @FormDataParam("password") String password) {
-        System.out.println("players/delete");
+        System.out.println("players/delete/" + token);
         try {
             if(token == null || password == null){
                 throw new Exception("One or more form data parameters are missing in the HTTP request");
